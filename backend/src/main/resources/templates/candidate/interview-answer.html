@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Interview Questions - AI Recruitment System</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <!-- Ambient Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-violet-600 to-purple-700 rounded-[32px] p-8 sm:p-10 text-white shadow-modern-card relative overflow-hidden">
+            <i class="bi bi-chat-square-quote-fill text-8xl absolute -right-4 -bottom-4 opacity-10"></i>
+            <div class="relative z-10">
+                <p class="text-violet-200 text-xs font-black uppercase tracking-widest mb-2">
+                    Interview Questions for
+                </p>
+                <h1 class="text-2xl sm:text-3xl font-black font-heading tracking-tight mb-1" th:text="${job.title}">Job Title</h1>
+                <p class="text-violet-200 font-medium text-sm" th:text="${job.department}">Department</p>
+            </div>
+        </div>
+
+        <!-- Parse Error -->
+        <div th:if="${parseError}" class="modern-card bg-rose-500/10 border border-rose-500/30 p-4 flex items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill text-rose-400 text-xl"></i>
+            <p class="font-bold text-rose-400" th:text="${parseError}"></p>
+        </div>
+
+        <!-- Already Submitted Banner -->
+        <div th:if="${application.hasInterviewAnswers()}" class="modern-card bg-emerald-500/10 border border-emerald-500/30 p-5 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-lg">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <h3 class="font-black text-emerald-400">Answers Submitted</h3>
+                <p class="text-emerald-400 text-xs font-bold">
+                    Submitted on <span th:text="${#temporals.format(application.answersSubmittedAt, 'dd MMM yyyy HH:mm')}"></span>
+                    — HR can now review your responses.
+                </p>
+            </div>
+        </div>
+
+        <!-- Questions Form -->
+        <form th:unless="${application.hasInterviewAnswers()}" th:action="@{/applications/{id}/interview/submit(id=${application.id})}" method="post" class="space-y-6">
+            <div th:each="q, iter : ${questions}" class="modern-card p-6 sm:p-8 border border-white/[0.08]">
+                <!-- Question Number -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center text-sm font-black shrink-0"
+                         th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-accent/20 border border-accent/20 text-accent-bright border border-violet-200"
+                              th:text="${q['category'] != null ? q['category'] : 'Question'}">Category</span>
+                        <span th:if="${q['focus'] != null}"
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-surface text-foreground-muted border border-white/[0.08] ml-1"
+                              th:text="${q['focus']}">Focus</span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <p class="font-bold text-base leading-relaxed mb-4 text-foreground" th:text="${q['question']}">Question text here</p>
+
+                <!-- Answer Textarea -->
+                <textarea th:name="'answer_' + ${iter.index}"
+                          rows="5"
+                          required
+                          placeholder="Type your answer here. Be detailed and use specific examples from your experience..."
+                          class="w-full px-4 py-3 rounded-2xl border border-white/[0.08] bg-surface font-medium text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all resize-y min-h-[120px] focus:bg-white/[0.05]"></textarea>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex items-center justify-between pt-2">
+                <a th:href="@{/applications/my-interviews}" class="text-sm font-bold text-foreground-muted hover:text-accent transition-colors">
+                    <i class="bi bi-arrow-left"></i> Back to Interviews
+                </a>
+                <button type="submit"
+                        class="flex items-center gap-2 px-8 py-3 rounded-2xl bg-violet-600 text-white font-black text-sm shadow-modern-button hover:-translate-y-1 hover:shadow-modern-buttonHover transition-all uppercase tracking-widest">
+                    <i class="bi bi-send-fill"></i> Submit Answers
+                </button>
+            </div>
+        </form>
+
+        <!-- Read-Only View (after submission) -->
+        <div th:if="${application.hasInterviewAnswers()}" class="space-y-6">
+            <div th:each="q, iter : ${questions}" class="modern-card p-6 sm:p-8 border border-white/[0.08]">
+                <!-- Question Number -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center text-sm font-black shrink-0"
+                         th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-accent/20 border border-accent/20 text-accent-bright border border-violet-200"
+                              th:text="${q['category'] != null ? q['category'] : 'Question'}">Category</span>
+                        <span th:if="${q['focus'] != null}"
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-surface text-foreground-muted border border-white/[0.08] ml-1"
+                              th:text="${q['focus']}">Focus</span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <p class="font-bold text-base leading-relaxed mb-3 text-foreground" th:text="${q['question']}">Question text</p>
+
+                <!-- Answer (read-only) -->
+                <div th:if="${answers != null && answers.size() > iter.index}" class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mt-3">
+                    <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1"><i class="bi bi-chat-left-quote"></i> Your Answer</p>
+                    <p class="text-sm font-medium text-emerald-100 whitespace-pre-line" th:text="${answers[iter.index]['answer']}">Answer text</p>
+                </div>
+            </div>
+
+            <div class="text-center pt-4">
+                <a th:href="@{/applications/my-interviews}" class="text-sm font-bold text-foreground-muted hover:text-accent transition-colors">
+                    <i class="bi bi-arrow-left"></i> Back to Interviews
+                </a>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

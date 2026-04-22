@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - AI Recruitment</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <script>
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.app-tab-content').forEach(el => el.classList.add('hidden'));
+            // Remove active states from buttons
+            document.querySelectorAll('.app-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-accent/10', 'text-accent', 'border-clay-accent');
+                btn.classList.add('border-transparent');
+            });
+            
+            // Show new tab
+            document.getElementById(tabId).classList.remove('hidden');
+            // Activate button
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('border-transparent');
+            activeBtn.classList.add('bg-accent/10', 'text-accent', 'border-clay-accent');
+        }
+
+        function checkPasswordLogic() {
+            const pwd = document.getElementById('newPassword').value;
+            const cfm = document.getElementById('confirmPassword').value;
+            const bar = document.getElementById('passwordStrength');
+            const submitBtn = document.getElementById('changePasswordBtn');
+            const feedbackText = document.getElementById('passwordFeedback');
+
+            // Strength
+            let str = 0;
+            if (pwd.length >= 8) str += 25;
+            if (/[A-Z]/.test(pwd)) str += 25;
+            if (/[0-9]/.test(pwd)) str += 25;
+            if (/[^A-Za-z0-9]/.test(pwd)) str += 25;
+            
+            bar.style.width = str + '%';
+            if (str < 50) { bar.className = 'h-full bg-rose-500 rounded-full transition-all'; feedbackText.innerText = 'Weak'; feedbackText.className = 'text-xs font-bold text-rose-400 mt-1'; }
+            else if (str < 75) { bar.className = 'h-full bg-amber-500 rounded-full transition-all'; feedbackText.innerText = 'Moderate'; feedbackText.className = 'text-xs font-bold text-amber-400 mt-1'; }
+            else { bar.className = 'h-full bg-emerald-500 rounded-full transition-all'; feedbackText.innerText = 'Strong'; feedbackText.className = 'text-xs font-bold text-emerald-400 mt-1'; }
+
+            // Match
+            const matchText = document.getElementById('passwordMatch');
+            if (cfm.length === 0) {
+                matchText.innerHTML = ''; submitBtn.disabled = true;
+                return;
+            }
+            if (pwd === cfm) {
+                matchText.innerHTML = '<span class="text-xs font-bold text-emerald-400"><i class="bi bi-check-circle-fill"></i> Matches</span>';
+                submitBtn.disabled = false;
+            } else {
+                matchText.innerHTML = '<span class="text-xs font-bold text-rose-400"><i class="bi bi-x-circle-fill"></i> Mismatch</span>';
+                submitBtn.disabled = true;
+            }
+        }
+    </script>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-24" onload="switchTab('personal')">
+
+    <!-- Ambient Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-6">
+
+        <!-- Alerts -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold text-sm">
+            <div class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span></div>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold text-sm">
+            <div class="flex items-center gap-3"><i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span></div>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <a th:href="@{/candidate/dashboard}" class="w-12 h-12 rounded-full bg-white text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight">Account Settings</h1>
+                    <p class="text-foreground-muted font-bold text-sm uppercase tracking-widest mt-1">Manage Profile Data</p>
+                </div>
+            </div>
+            <span class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-accent/20 border border-accent/20 text-accent font-bold text-xs uppercase tracking-widest rounded-xl shadow-sm">
+                <i class="bi bi-shield-check"></i> Verified Profile
+            </span>
+        </div>
+
+        <div class="modern-card p-0 flex flex-col md:flex-row overflow-hidden">
+            
+            <!-- Sidebar Navigation -->
+            <div class="md:w-64 bg-white/[0.02]/50 border-r border-white/[0.08] p-4 sm:p-6 flex flex-col gap-2 shrink-0">
+                <button id="btn-personal" onclick="switchTab('personal')" class="app-tab-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-2xl font-bold text-sm text-foreground-muted border border-transparent transition-all border-l-4">
+                    <i class="bi bi-person-fill text-lg"></i> Personal Details
+                </button>
+                <button id="btn-professional" onclick="switchTab('professional')" class="app-tab-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-2xl font-bold text-sm text-foreground-muted border border-transparent transition-all border-l-4">
+                    <i class="bi bi-briefcase-fill text-lg"></i> Professional Details
+                </button>
+                <button id="btn-security" onclick="switchTab('security')" class="app-tab-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-2xl font-bold text-sm text-foreground-muted border border-transparent transition-all border-l-4">
+                    <i class="bi bi-shield-lock-fill text-lg"></i> Security
+                </button>
+                <div class="h-px bg-clay-muted/10 my-2"></div>
+                <button id="btn-account" onclick="switchTab('account')" class="app-tab-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-2xl font-bold text-sm text-rose-400 border border-transparent hover:bg-rose-500/10 transition-all border-l-4">
+                    <i class="bi bi-gear-fill text-lg text-rose-400"></i> Danger Zone
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-6 sm:p-10 relative bg-white/[0.06]">
+                
+                <!-- Personal Tab -->
+                <div id="personal" class="app-tab-content">
+                    <h3 class="text-2xl font-black font-heading mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-person-vcard text-accent"></i> Personal Information
+                    </h3>
+                    
+                    <form th:action="@{/candidate/profile/update}" method="post" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">First Name <span class="text-rose-400">*</span></label>
+                                <input type="text" name="firstName" th:value="${user.firstName}" required class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Last Name <span class="text-rose-400">*</span></label>
+                                <input type="text" name="lastName" th:value="${user.lastName}" required class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Email Address <span class="text-rose-400">*</span></label>
+                                <input type="email" name="email" th:value="${user.email}" required class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]" readonly title="Email changes require separate auth setup">
+                                <small class="text-[10px] uppercase font-bold text-foreground-muted ml-2 mt-1">Bound to Account</small>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Primary Phone</label>
+                                <input type="tel" name="phone" th:value="${user.phone}" class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 mt-6 border-t border-white/[0.08] text-right">
+                            <button type="submit" class="modern-btn modern-btn-primary px-8">
+                                <i class="bi bi-save mr-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Professional Tab -->
+                <div id="professional" class="app-tab-content hidden">
+                    <h3 class="text-2xl font-black font-heading mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-briefcase text-emerald-400"></i> Professional Details
+                    </h3>
+                    
+                    <form th:action="@{/candidate/profile/update}" method="post" class="space-y-6">
+                        <input type="hidden" name="firstName" th:value="${user.firstName}">
+                        <input type="hidden" name="lastName" th:value="${user.lastName}">
+                        <input type="hidden" name="email" th:value="${user.email}">
+                        <input type="hidden" name="phone" th:value="${user.phone}">
+                        
+                        <div class="bg-accent/10/50 border border-indigo-100/20 p-4 rounded-2xl flex gap-3 text-accent-bright text-sm mb-6">
+                            <i class="bi bi-info-circle-fill text-lg mt-0.5"></i>
+                            <p class="font-medium">Modifying these attributes locally will trigger an immediate re-evaluation across the system.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Skills (Comma separated) <span class="text-rose-400">*</span></label>
+                            <textarea name="skills" rows="3" required class="modern-input shadow-inner min-h-[100px] resize-y bg-surface focus:bg-white/[0.05]" th:text="${user.skills}" placeholder="e.g. Kotlin, React, System Design"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Years of Experience</label>
+                                <input type="number" name="experienceYears" th:value="${user.experienceYears}" min="0" max="50" class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Highest Education Details</label>
+                                <input type="text" name="education" th:value="${user.education}" class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]" placeholder="e.g. B.S. Architecture">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 mt-6 border-t border-white/[0.08] text-right">
+                            <button type="submit" class="modern-btn modern-btn-success px-8">
+                                <i class="bi bi-save mr-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Security Tab -->
+                <div id="security" class="app-tab-content hidden">
+                    <h3 class="text-2xl font-black font-heading mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-shield-lock text-amber-400"></i> Password Management
+                    </h3>
+
+                    <form th:action="@{/candidate/change-password}" method="post" id="passwordForm" class="space-y-6 max-w-lg">
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Current Password <span class="text-rose-400">*</span></label>
+                            <input type="password" name="currentPassword" required class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">New Password <span class="text-rose-400">*</span></label>
+                            <input type="password" id="newPassword" name="newPassword" required onkeyup="checkPasswordLogic()" class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            <div class="mt-3 h-1.5 w-full bg-surface rounded-full shadow-inset overflow-hidden">
+                                <div id="passwordStrength" class="h-full w-0 transition-all duration-300"></div>
+                            </div>
+                            <div id="passwordFeedback" class="mt-1"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Confirm New Password <span class="text-rose-400">*</span></label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required onkeyup="checkPasswordLogic()" class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]">
+                            <div id="passwordMatch" class="mt-2"></div>
+                        </div>
+
+                        <div class="pt-4 mt-6 border-t border-white/[0.08]">
+                            <button type="submit" id="changePasswordBtn" class="modern-btn modern-btn-primary w-full shadow-amber-500/30" disabled>
+                                <i class="bi bi-key mr-2"></i> Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account / Danger Zone Tab -->
+                <div id="account" class="app-tab-content hidden">
+                    <h3 class="text-2xl font-black font-heading text-rose-400 mb-6 flex items-center gap-3 border-b border-rose-500/20 pb-4">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Danger Zone
+                    </h3>
+
+                    <div class="space-y-8">
+                        <div class="bg-rose-500/10 rounded-2xl p-6 border border-rose-500/20 flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm">
+                            <div>
+                                <h6 class="font-black text-lg mb-1 text-rose-100">Delete Account</h6>
+                                <p class="text-sm font-medium text-rose-200/70 max-w-sm">Permanently deletes your account and all associated data.</p>
+                            </div>
+                            <!-- Simple native modal toggle via absolute div or basic JS, but let's just use CSS/JS inline -->
+                            <button onclick="document.getElementById('deleteModalOverlay').classList.remove('hidden')" class="px-6 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 active:scale-95 transition-all shadow-sm shrink-0">
+                                <i class="bi bi-trash mr-2"></i> Delete Permanently
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Native Tailwind Modal for Deletion -->
+    <div id="deleteModalOverlay" class="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="modern-card max-w-md w-full p-8 relative flex flex-col">
+            <div class="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center text-3xl mb-6 shadow-inner mx-auto">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+            <h3 class="text-2xl font-black text-center mb-2">Delete Account</h3>
+            <p class="text-center text-foreground-muted font-medium mb-6 text-sm">This action is permanent and cannot be undone. Enter your password to authorize.</p>
+            
+            <form th:action="@{/candidate/delete-account}" method="post" class="space-y-6">
+                <input type="password" name="password" required class="modern-input shadow-inner bg-surface focus:bg-white/[0.05]" placeholder="Password">
+                <div class="flex gap-4">
+                    <button type="button" onclick="document.getElementById('deleteModalOverlay').classList.add('hidden')" class="flex-1 px-4 py-3 rounded-xl border border-border-default/20 font-bold text-foreground-muted hover:bg-white/[0.02] transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold shadow-modern-button hover:-translate-y-1 hover:shadow-modern-buttonHover transition-all">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

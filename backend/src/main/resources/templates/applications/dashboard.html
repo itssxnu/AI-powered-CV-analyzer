@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications Dashboard - HR/Admin</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <!-- Include Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                    <i class="bi bi-radar text-accent"></i> Analytics Surface
+                </h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                    Network Node Management
+                </p>
+            </div>
+            
+            <div class="shrink-0 modern-card px-8 py-4 bg-white text-foreground flex items-center justify-center shadow-clay border border-white/[0.08]">
+                <i class="bi bi-hdd-network-fill text-3xl text-accent mr-4"></i>
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle leading-tight">Active Trackers</p>
+                    <p class="text-3xl font-black" th:text="${#maps.size(jobWiseCounts)}">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Telemetry HUD -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="modern-card p-6 bg-gradient-to-br from-slate-700 to-slate-900 border-0 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <i class="bi bi-envelope-fill absolute -right-4 -bottom-4 text-8xl text-white opacity-5 group-hover:opacity-10 transition-opacity"></i>
+                <h4 class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-2">Total Inbound</h4>
+                <div class="text-5xl font-black" th:text="${#aggregates.sum(jobWiseCounts.values())}">0</div>
+            </div>
+            <div class="modern-card p-6 bg-gradient-to-br from-amber-400 to-amber-600 border-0 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <i class="bi bi-hourglass-split absolute -right-4 -bottom-4 text-8xl text-white opacity-10 group-hover:opacity-20 transition-opacity"></i>
+                <h4 class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-2">Awaiting Processing</h4>
+                <div class="text-5xl font-black" id="pendingCount">0</div>
+            </div>
+            <div class="modern-card p-6 bg-gradient-to-br from-sky-400 to-sky-600 border-0 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <i class="bi bi-star-fill absolute -right-4 -bottom-4 text-8xl text-white opacity-10 group-hover:opacity-20 transition-opacity"></i>
+                <h4 class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-2">VIP Buffer</h4>
+                <div class="text-5xl font-black" id="shortlistedCount">0</div>
+            </div>
+            <div class="modern-card p-6 bg-gradient-to-br from-emerald-400 to-emerald-600 border-0 text-white relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                <i class="bi bi-calendar-event-fill absolute -right-4 -bottom-4 text-8xl text-white opacity-10 group-hover:opacity-20 transition-opacity"></i>
+                <h4 class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-2">Event Queue</h4>
+                <div class="text-5xl font-black" th:text="${upcomingInterviews.size()}">0</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            <!-- Left Column -->
+            <div class="space-y-8">
+                
+                <!-- Applications by Job -->
+                <div class="modern-card p-0 overflow-hidden border-2 border-white/[0.04]">
+                    <div class="p-6 bg-white border-b border-white/[0.04] flex justify-between items-center">
+                        <h5 class="font-black text-foreground flex items-center gap-2">
+                            <i class="bi bi-diagram-3-fill text-accent"></i> Node Activity List
+                        </h5>
+                    </div>
+                    
+                    <div class="p-0">
+                        <div th:if="${jobWiseCounts.isEmpty()}" class="py-16 text-center">
+                            <i class="bi bi-hdd-rack text-5xl text-slate-300 mb-4 block"></i>
+                            <h6 class="font-bold text-foreground-subtle">Network Idle</h6>
+                        </div>
+                        
+                        <div th:unless="${jobWiseCounts.isEmpty()}" class="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
+                            
+                            <a th:each="entry : ${jobWiseCounts}" th:href="@{/applications/job/{id}(id=${#strings.substringAfter(entry.key, 'ID: ')})}"
+                               class="flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors group">
+                                
+                                <div>
+                                    <h6 class="font-black text-foreground text-lg group-hover:text-accent transition-colors" th:text="${entry.key}">Software Engineer</h6>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-0.5">View Node Matrix <i class="bi bi-chevron-right ml-1"></i></p>
+                                </div>
+                                <div class="shrink-0 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-[14px] bg-surface text-accent font-black text-xl flex items-center justify-center border border-white/[0.08] shadow-sm" th:text="${entry.value}">
+                                        15
+                                    </div>
+                                </div>
+                                
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Grid -->
+                <div class="modern-card p-6 bg-slate-800 text-white border-0 relative overflow-hidden group">
+                    <i class="bi bi-terminal absolute -right-10 -bottom-10 text-9xl text-white opacity-5 group-hover:opacity-10 transition-opacity"></i>
+                    
+                    <h5 class="font-black flex items-center gap-2 mb-6">
+                        <i class="bi bi-lightning-charge-fill text-amber-400"></i> Control Deck
+                    </h5>
+
+                    <div class="grid grid-cols-2 gap-4 relative z-10">
+                        <a href="/jobs/create" class="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
+                            <i class="bi bi-plus-circle text-2xl text-sky-400"></i>
+                            <span class="text-xs font-bold tracking-widest uppercase">Init Node</span>
+                        </a>
+                        <a href="/hr/candidates" class="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
+                            <i class="bi bi-people text-2xl text-emerald-400"></i>
+                            <span class="text-xs font-bold tracking-widest uppercase">Entity DB</span>
+                        </a>
+                        <button onclick="archiveOld()" class="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
+                            <i class="bi bi-archive text-2xl text-amber-400"></i>
+                            <span class="text-xs font-bold tracking-widest uppercase">Purge</span>
+                        </button>
+                        <a href="/skill-match/dashboard" class="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors">
+                            <i class="bi bi-cpu text-2xl text-purple-400"></i>
+                            <span class="text-xs font-bold tracking-widest uppercase">ML Core</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                
+                <!-- Upcoming Interviews -->
+                <div class="modern-card p-0 overflow-hidden border-2 border-white/[0.04]">
+                    <div class="p-6 bg-white border-b border-white/[0.04] flex justify-between items-center">
+                        <h5 class="font-black text-foreground flex items-center gap-2">
+                            <i class="bi bi-calendar2-minus-fill text-sky-500"></i> Active Timers
+                        </h5>
+                        <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-xs" th:text="${upcomingInterviews.size()}">0</div>
+                    </div>
+                    
+                    <div class="p-4" style="max-height: 400px; overflow-y: auto;">
+                        <div th:if="${upcomingInterviews.isEmpty()}" class="py-12 text-center text-slate-300">
+                            <i class="bi bi-calendar-x text-5xl mb-4 block"></i>
+                            <h6 class="font-bold text-foreground-subtle">No Events Pending</h6>
+                        </div>
+
+                        <div th:unless="${upcomingInterviews.isEmpty()}" class="space-y-4">
+                            
+                            <div th:each="interview : ${upcomingInterviews}" class="p-4 rounded-[20px] border-2 border-white/[0.04] bg-white/[0.02]/50 hover:bg-white transition-colors relative pl-12 group">
+                                <div class="absolute top-0 bottom-0 left-0 w-8 bg-sky-100 border-r border-sky-200 rounded-l-[18px] flex flex-col items-center justify-center text-sky-600"
+                                     th:classappend="${interview.interviewType == 'ONLINE'} ? 'bg-sky-100 border-sky-200 text-sky-600' : (${interview.interviewType == 'PHONE'} ? 'bg-amber-500/20 border border-amber-500/30 border-amber-200 text-amber-400' : 'bg-surface border-white/[0.08] text-foreground-muted')">
+                                    <i class="bi text-lg" th:classappend="${interview.interviewType == 'ONLINE'} ? 'bi-camera-video-fill' : (${interview.interviewType == 'PHONE'} ? 'bi-telephone-fill' : 'bi-building-fill')"></i>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h6 class="font-black text-foreground text-lg" th:text="${interview.candidate.fullName}">John Doe</h6>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/30 text-emerald-400" th:text="${interview.job.title}">Node</span>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-white/[0.08] text-foreground-muted" th:text="${interview.interviewType}">Type</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <a th:href="@{/applications/{id}(id=${interview.id})}" class="w-8 h-8 rounded-full bg-white shadow-sm border border-white/[0.08] text-foreground-subtle hover:text-accent flex items-center justify-center shrink-0">
+                                        <i class="bi bi-arrow-up-right"></i>
+                                    </a>
+                                </div>
+                                
+                                <div class="mt-4 pt-4 border-t border-white/[0.08]/50 flex flex-col gap-2">
+                                    <div class="flex items-center text-xs font-bold text-foreground-muted">
+                                        <i class="bi bi-clock-fill text-sky-400 mr-2"></i> <span th:text="${#temporals.format(interview.interviewDate, 'dd MMM yyyy HH:mm')}"></span>
+                                    </div>
+                                    
+                                    <div th:if="${interview.interviewLocation}" class="flex items-center text-xs font-bold text-foreground-muted">
+                                        <i class="bi bi-geo-alt-fill text-rose-400 mr-2"></i> <span th:text="${interview.interviewLocation}"></span>
+                                    </div>
+                                    <a th:if="${interview.interviewLink}" th:href="${interview.interviewLink}" target="_blank" class="flex items-center text-xs font-bold text-accent hover:text-accent-bright">
+                                        <i class="bi bi-link-45deg text-indigo-400 mr-1 text-lg leading-none"></i> Access Link
+                                    </a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution Chart -->
+                <div class="modern-card p-6 border-0">
+                    <h5 class="font-black text-foreground flex items-center gap-2 mb-6">
+                        <i class="bi bi-pie-chart-fill text-accent"></i> Vector Distribution
+                    </h5>
+                    <div class="h-[250px] relative">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script th:inline="javascript">
+        // Fetch and display status distribution
+        fetch('/applications/api/statistics/job/0')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('statusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Targeted', 'Assessing', 'Purged', 'Acquired'],
+                        datasets: [{
+                            data: [
+                                data.statusCounts?.PENDING || 0,
+                                data.statusCounts?.SHORTLISTED || 0,
+                                data.statusCounts?.INTERVIEW_SCHEDULED || 0,
+                                data.statusCounts?.REJECTED || 0,
+                                data.statusCounts?.HIRED || 0
+                            ],
+                            backgroundColor: [
+                                '#fbbf24', // amber-400
+                                '#38bdf8', // sky-400
+                                '#818cf8', // indigo-400
+                                '#fb7185', // rose-400
+                                '#34d399'  // emerald-400
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        family: "'Nunito', sans-serif",
+                                        weight: 'bold',
+                                        size: 11
+                                    },
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Update stats numbers
+                document.getElementById('pendingCount').textContent = data.statusCounts?.PENDING || 0;
+                document.getElementById('shortlistedCount').textContent = data.statusCounts?.SHORTLISTED || 0;
+            });
+
+        function archiveOld() {
+            const days = prompt('SYSTEM PURGE:\nSpecify threshold (days) to archive old tracking data:', '30');
+            if (days) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+                fetch('/applications/api/archive/' + days, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
+                }).then(response => {
+                    if (response.ok) {
+                        alert('System purge successful.');
+                        window.location.reload();
+                    } else {
+                        alert('System purge failed.');
+                    }
+                }).catch(err => alert("Protocol Error: " + err));
+            }
+        }
+    </script>
+</body>
+</html>

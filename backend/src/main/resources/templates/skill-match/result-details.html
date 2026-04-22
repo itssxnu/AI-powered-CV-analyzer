@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Result Details</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <!-- Admin/HR Back Button -->
+                <a sec:authorize="hasAnyRole('HR', 'ADMIN')" th:href="@{/skill-match/job/{id}(id=${job.id})}" class="mt-1 w-12 h-12 rounded-full bg-surface border border-white/10 text-foreground-muted flex items-center justify-center hover:text-accent hover:border-indigo-500/30 hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <!-- Candidate Back Button -->
+                <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/skill-match/my-results}" class="mt-1 w-12 h-12 rounded-full bg-surface border border-white/10 text-foreground-muted flex items-center justify-center hover:text-accent hover:border-indigo-500/30 hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-graph-up-arrow text-rose-400"></i> Match Analysis
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Detailed Breakdown
+                    </p>
+                </div>
+            </div>
+            
+            <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="flex flex-wrap gap-3">
+                <form th:action="@{/skill-match/recalculate/{id}(id=${result.id})}" method="post" class="m-0">
+                    <button type="submit" class="modern-btn bg-amber-500 text-white shadow-amber-500/30 hover:bg-amber-400">
+                        <i class="bi bi-arrow-repeat mr-2"></i> Recalculate Score
+                    </button>
+                </form>
+                <a th:href="@{/hr/candidates/{id}(id=${candidate.id})}" class="modern-btn modern-btn-primary shadow-indigo-500/30">
+                    <i class="bi bi-person mr-2 text-indigo-300"></i> View Candidate
+                </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-check-circle-fill text-xl text-emerald-400"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-exclamation-triangle-fill text-xl text-rose-400"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left Column: Primary Entity Info & Identity -->
+            <div class="space-y-6">
+                
+                <!-- Main Identity Card -->
+                <div class="modern-card p-8 border border-white/[0.08] bg-surface shadow-lg text-center relative overflow-hidden group">
+                    <div class="absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-10 transition-transform group-hover:scale-110 blur-3xl"
+                         th:classappend="${result.overallScore >= 80 ? 'bg-emerald-500' : (result.overallScore >= 60 ? 'bg-amber-500' : 'bg-rose-500')}"></div>
+
+                    <div class="w-36 h-36 mx-auto rounded-full flex items-center justify-center text-5xl font-black text-white shadow-xl mb-4 relative z-10"
+                         th:classappend="${result.overallScore >= 80 ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/40' : (result.overallScore >= 60 ? 'bg-gradient-to-br from-amber-400 to-amber-600 shadow-amber-500/40' : 'bg-gradient-to-br from-rose-400 to-rose-600 shadow-rose-500/40')}">
+                        <span th:text="${#numbers.formatDecimal(result.overallScore, 1, 1)}">85.0</span>
+                    </div>
+
+                    <h4 class="text-xl font-black text-foreground mb-1 relative z-10 tracking-tight" th:text="${result.matchLevel}">Excellent Match</h4>
+                    <p class="text-[10px] font-bold tracking-widest uppercase text-foreground-subtle mb-6 relative z-10 text-center">Overall Match Score</p>
+
+                    <h3 class="text-xl font-black text-foreground-muted bg-white/[0.02] p-3 rounded-xl border border-white/[0.04] mb-2 relative z-10 shadow-inner" th:text="${candidate.fullName}">John Doe</h3>
+                    <p class="text-[10px] font-bold tracking-widest uppercase text-foreground-subtle relative z-10"><i class="bi bi-envelope mr-1"></i> <span th:text="${candidate.email}"></span></p>
+
+                    <hr class="my-6 border-white/[0.04]">
+
+                    <div class="grid gap-3 text-left relative z-10">
+                        <div class="bg-accent/10/50 border border-indigo-100/20 rounded-xl p-3 flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Rank Position</span>
+                            <div class="font-black text-accent">
+                                <span th:if="${result.rankPosition != null}" th:text="${result.rankPosition} + ' of ' + ${result.totalCandidatesRanked}"></span>
+                                <span th:unless="${result.rankPosition != null}" class="text-indigo-300">N/A</span>
+                            </div>
+                        </div>
+                        <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-sky-400">AI Confidence</span>
+                            <span class="font-black text-sky-400 text-lg" th:text="${#numbers.formatDecimal(result.aiConfidence, 1, 1)} + '%'">95%</span>
+                        </div>
+                        <div class="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Recalculations</span>
+                            <span class="font-black text-foreground-muted bg-white/[0.08] px-2 py-0.5 rounded text-xs" th:text="${result.recalculationCount}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Info Card -->
+                <div class="modern-card p-6 bg-slate-800 border-0 text-white relative overflow-hidden group">
+                    <i class="bi bi-cpu absolute -right-6 -bottom-6 text-8xl text-accent opacity-20 group-hover:scale-110 transition-transform"></i>
+                    <h5 class="font-black flex items-center gap-2 mb-6">
+                        <i class="bi bi-hdd-network-fill text-indigo-400"></i> Engine Diagnostic
+                    </h5>
+
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Process Time</span>
+                            <span class="font-black text-emerald-400 tracking-wider" th:text="${result.aiProcessingTimeMs != null ? result.aiProcessingTimeMs + ' ms' : 'N/A'}">235 ms</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Model Version</span>
+                            <span class="font-black text-slate-300 font-mono text-xs bg-slate-900 px-2 py-1 rounded" th:text="${result.aiModelVersion != null ? result.aiModelVersion : 'v1.0.0'}">v1.0.0</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Initial Compute</span>
+                            <span class="font-black text-slate-300 text-[10px]" th:text="${#temporals.format(result.matchDate, 'dd/MM/yy HH:mm')}">01 Jan</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400/70">Last Sync</span>
+                            <span class="font-black text-amber-400 text-[10px]" th:text="${result.lastRecalculatedDate != null ? #temporals.format(result.lastRecalculatedDate, 'dd/MM/yy HH:mm') : 'NO SYNC'}">Never</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Middle Column: Sub-Component Breakdown & Skill Diffs -->
+            <div class="space-y-6">
+                
+                <!-- Component Scores -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden">
+                    <div class="p-6 bg-white/[0.04] border-b border-white/[0.08] flex justify-between items-center backdrop-blur-sm">
+                        <h5 class="font-black text-foreground flex items-center gap-2"><i class="bi bi-pie-chart-fill text-rose-400"></i> Score Breakdown</h5>
+                    </div>
+                    
+                    <div class="p-6 space-y-5">
+                        <!-- Skills Score -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2">Skills</span>
+                                <span class="font-black text-emerald-400 text-lg" th:text="${#numbers.formatDecimal(result.skillsScore, 1, 1)} + '%'">85%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 shadow-inner overflow-hidden">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" role="progressbar" th:style="'width: ' + ${result.skillsScore} + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Experience Score -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2">Experience</span>
+                                <span class="font-black text-amber-400 text-lg" th:text="${#numbers.formatDecimal(result.experienceScore, 1, 1)} + '%'">70%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 shadow-inner overflow-hidden">
+                                <div class="bg-amber-500 h-2 rounded-full transition-all duration-1000 delay-100" role="progressbar" th:style="'width: ' + ${result.experienceScore} + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Education Score -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2">Education</span>
+                                <span class="font-black text-sky-500 text-lg" th:text="${#numbers.formatDecimal(result.educationScore, 1, 1)} + '%'">90%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 shadow-inner overflow-hidden">
+                                <div class="bg-sky-500 h-2 rounded-full transition-all duration-1000 delay-200" role="progressbar" th:style="'width: ' + ${result.educationScore} + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Personality Score -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2">Personality</span>
+                                <span class="font-black text-accent text-lg" th:text="${#numbers.formatDecimal(result.personalityScore, 1, 1)} + '%'">75%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 shadow-inner overflow-hidden">
+                                <div class="bg-indigo-500 h-2 rounded-full transition-all duration-1000 delay-300" role="progressbar" th:style="'width: ' + ${result.personalityScore} + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cultural Fit -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2">Cultural Fit</span>
+                                <span class="font-black text-purple-500 text-lg" th:text="${#numbers.formatDecimal(result.culturalFitScore, 1, 1)} + '%'">80%</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 shadow-inner overflow-hidden">
+                                <div class="bg-purple-500 h-2 rounded-full transition-all duration-1000 delay-400" role="progressbar" th:style="'width: ' + ${result.culturalFitScore} + '%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Diff Analysis -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-inner">
+                    <div class="p-4 bg-surface/50 border-b border-white/[0.08]">
+                        <h5 class="font-black text-foreground flex items-center gap-2"><i class="bi bi-funnel-fill text-accent"></i> Skills Gap Analysis</h5>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        <!-- Hits -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <h6 class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Matched Skills</h6>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5" th:if="${result.matchedSkills != null and !result.matchedSkills.isEmpty()}">
+                                <span th:each="skill : ${#strings.listSplit(result.matchedSkills, ',')}" 
+                                      class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-1 rounded text-xs font-bold shadow-sm" th:text="${skill.trim()}">Java</span>
+                            </div>
+                            <p th:unless="${result.matchedSkills != null and !result.matchedSkills.isEmpty()}" class="text-xs font-bold text-foreground-subtle italic bg-white/[0.02] p-2 rounded-lg border border-white/[0.04]">
+                                No skill matches.
+                            </p>
+                        </div>
+
+                        <!-- Partial -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                <h6 class="text-[10px] font-black uppercase tracking-widest text-amber-400">Partial Matches</h6>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5" th:if="${result.partialSkills != null and !result.partialSkills.isEmpty()}">
+                                <span th:each="skill : ${#strings.listSplit(result.partialSkills, ',')}" 
+                                      class="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-1 rounded text-xs font-bold shadow-sm" th:text="${skill.trim()}">JavaScript</span>
+                            </div>
+                            <p th:unless="${result.partialSkills != null and !result.partialSkills.isEmpty()}" class="text-xs font-bold text-foreground-subtle italic bg-white/[0.02] p-2 rounded-lg border border-white/[0.04]">
+                                No partial matches.
+                            </p>
+                        </div>
+
+                        <!-- Misses -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-2 h-2 rounded-full bg-rose-500"></div>
+                                <h6 class="text-[10px] font-black uppercase tracking-widest text-rose-400">Missing Skills</h6>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5" th:if="${result.missingSkills != null and !result.missingSkills.isEmpty()}">
+                                <span th:each="skill : ${#strings.listSplit(result.missingSkills, ',')}" 
+                                      class="bg-rose-500/10 border border-rose-500/30 text-rose-400 px-2 py-1 rounded text-xs font-bold shadow-sm" th:text="${skill.trim()}">Python</span>
+                            </div>
+                            <p th:unless="${result.missingSkills != null and !result.missingSkills.isEmpty()}" class="text-xs font-bold text-foreground-subtle italic bg-white/[0.02] p-2 rounded-lg border border-white/[0.04]">
+                                Perfect alignment. No missing skills.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Extracted Raw Context -->
+            <div class="space-y-6">
+                
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-inner">
+                    <div class="p-6 bg-slate-800 border-b border-slate-700 text-white shadow-md z-10 relative">
+                        <h5 class="font-black flex items-center gap-2"><i class="bi bi-file-earmark-text text-amber-400"></i> Extracted Data</h5>
+                        <p class="text-[10px] text-foreground-subtle font-bold uppercase tracking-widest mt-1">Information identified by AI</p>
+                    </div>
+                    
+                    <div class="p-2 space-y-2 max-h-[500px] overflow-y-auto">
+                        
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-accent mb-2 flex items-center gap-2"><i class="bi bi-braces bg-accent/10 p-1 rounded"></i> Skills</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedSkills != null ? result.extractedSkills : 'None identified'}">Java, Spring Boot, SQL</p>
+                        </div>
+
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-amber-400 mb-2 flex items-center gap-2"><i class="bi bi-clock-history bg-amber-500/10 p-1 rounded"></i> Experience</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedExperience != null ? result.extractedExperience : 'None identified'}">5 years of experience</p>
+                        </div>
+
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-sky-500 mb-2 flex items-center gap-2"><i class="bi bi-journal-bookmark bg-sky-50 p-1 rounded"></i> Education</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedEducation != null ? result.extractedEducation : 'None identified'}">B.Tech Computer Science</p>
+                        </div>
+
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-rose-400 mb-2 flex items-center gap-2"><i class="bi bi-patch-check bg-rose-500/10 p-1 rounded"></i> Certifications</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedCertifications != null ? result.extractedCertifications : 'None identified'}">AWS Certified</p>
+                        </div>
+                        
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-purple-500 mb-2 flex items-center gap-2"><i class="bi bi-translate bg-purple-50 p-1 rounded"></i> Languages</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedLanguages != null ? result.extractedLanguages : 'None identified'}">English, Spanish</p>
+                        </div>
+
+                        <div class="bg-background-base border border-white/[0.04] p-4 rounded-xl shadow-sm">
+                            <h6 class="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-2"><i class="bi bi-boxes bg-emerald-500/10 p-1 rounded"></i> Projects</h6>
+                            <p class="text-sm font-medium text-foreground-muted leading-relaxed" th:text="${result.extractedProjects != null ? result.extractedProjects : 'None identified'}">E-commerce Platform</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div th:if="${result.rawExtractedData != null}" class="modern-card p-0 bg-slate-900 border-0 text-white overflow-hidden shadow-inner font-mono text-xs mt-6">
+                    <div class="p-4 bg-slate-800 border-b border-white/10 flex justify-between items-center shadow-lg">
+                        <h6 class="font-bold flex items-center gap-2 text-indigo-400"><i class="bi bi-terminal-fill"></i> System Logs</h6>
+                    </div>
+                    <div class="p-4 overflow-y-auto max-h-[300px] custom-scrollbar bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0JyBoZWlnaHQ9JzQnPgo8cmVjdCB3aWR0aD0nNCcgaGVpZ2h0PSc0JyBmaWxsPSdibGFjaycgZmlsbC1vcGFjaXR5PScwLjA1Jy8+Cjwvc3ZnPg==')]">
+                        <pre class="text-slate-300 whitespace-pre-wrap word-break" th:text="${result.rawExtractedData}">Raw text...</pre>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Custom Scrollbar for Terminal -->
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+    </style>
+</body>
+</html>

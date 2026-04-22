@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Recruitment System</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="flex items-center justify-center m-0 p-4">
+
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+    <!-- Go Back -->
+    <a href="/" class="absolute top-8 left-8 w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-foreground-subtle hover:text-white border border-white/[0.06] hover:bg-white/[0.08] hover:-translate-x-1 transition-all text-lg z-20">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+
+    <div class="w-full max-w-md relative z-10 flex flex-col gap-6 mt-12">
+        
+        <div class="modern-card p-0 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="border-b border-border-default bg-white/[0.02] p-8 text-center relative overflow-hidden">
+                <i class="bi bi-robot text-6xl opacity-[0.03] absolute -right-2 -bottom-2"></i>
+                <div class="w-12 h-12 rounded-xl bg-surface border border-white/10 mx-auto flex items-center justify-center text-xl shadow-inner mb-4">
+                    <i class="bi bi-person text-foreground-subtle"></i>
+                </div>
+                <h2 class="text-2xl font-semibold tracking-tight mb-1 text-foreground">Welcome Back</h2>
+                <p class="text-xs font-medium text-foreground-muted uppercase tracking-widest">Sign in to continue</p>
+            </div>
+
+            <div class="p-8">
+                <!-- Alerts -->
+                <div th:if="${message}" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-lg flex items-center gap-3 mb-6">
+                    <i class="bi bi-check-circle"></i> <span th:text="${message}" class="text-sm font-medium"></span>
+                </div>
+                <div th:if="${error}" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-lg flex items-center gap-3 mb-6">
+                    <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}" class="text-sm font-medium"></span>
+                </div>
+
+                <form th:action="@{/auth/login}" method="post" class="space-y-5">
+                    <div>
+                        <label for="username" class="block text-xs font-semibold text-foreground-muted uppercase tracking-wide mb-2 ml-1">Username</label>
+                        <div class="relative">
+                            <i class="bi bi-at absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle text-lg"></i>
+                            <input type="text" id="username" name="username" required placeholder="Enter username" class="modern-input pl-11">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-xs font-semibold text-foreground-muted uppercase tracking-wide mb-2 ml-1">Password</label>
+                        <div class="relative">
+                            <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle text-md"></i>
+                            <input type="password" id="password" name="password" required placeholder="Enter password" class="modern-input pl-11">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="modern-btn modern-btn-primary w-full h-12 mt-2">
+                        Sign In <i class="bi bi-arrow-right ml-2"></i>
+                    </button>
+                </form>
+
+                <div class="mt-8 text-center border-t border-border-default pt-6">
+                    <p class="text-xs text-foreground-muted mb-4">Don't have an account?</p>
+                    <a th:href="@{/auth/register}" class="modern-btn modern-btn-secondary w-full">
+                        Create an Account
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Accounts helper -->
+        <div class="modern-card p-5 text-center">
+            <h6 class="text-[11px] font-semibold uppercase tracking-widest text-foreground-muted mb-3 flex items-center justify-center gap-2">
+                <i class="bi bi-info-circle text-accent"></i> Demo Access
+            </h6>
+            <div class="flex flex-col gap-2 text-sm">
+                <div class="flex items-center justify-between font-mono bg-white/[0.04] border border-white/[0.06] px-3 py-2 rounded-lg">
+                    <span class="font-medium text-amber-400">admin / admin123</span> <span class="text-[10px] uppercase font-semibold text-foreground-subtle">Admin</span>
+                </div>
+                <div class="flex items-center justify-between font-mono bg-white/[0.04] border border-white/[0.06] px-3 py-2 rounded-lg">
+                    <span class="font-medium text-emerald-400">hr1 / hr123</span> <span class="text-[10px] uppercase font-semibold text-foreground-subtle">HR</span>
+                </div>
+                <div class="flex items-center justify-between font-mono bg-white/[0.04] border border-white/[0.06] px-3 py-2 rounded-lg">
+                    <span class="font-medium text-accent-bright">john_doe / candidate123</span> <span class="text-[10px] uppercase font-semibold text-foreground-subtle">Candidate</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Ranking Details - ' + ${candidate.fullName}">Ranking Details</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <a th:href="@{/ranking/job/{id}(id=${job.id})}" class="mt-1 w-12 h-12 rounded-full bg-surface text-foreground flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-person-bounding-box text-accent"></i> Candidate Ranking Details
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Ranking Breakdown
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+                <a th:href="@{/hr/candidates/{id}(id=${candidate.id})}" class="modern-btn modern-btn-primary shadow-indigo-500/30">
+                    <i class="bi bi-person mr-2 text-indigo-300"></i> Candidate Profile
+                </a>
+                <button onclick="window.print()" class="modern-btn bg-surface text-foreground-muted border border-white/[0.08] shadow-sm hover:text-accent">
+                    <i class="bi bi-printer"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-check-circle-fill text-xl text-emerald-400"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-exclamation-triangle-fill text-xl text-rose-400"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left Column: Primary Entity Info & Identity -->
+            <div class="space-y-6">
+                
+                <!-- Main Identity Card -->
+                <div class="modern-card p-8 border border-white/[0.08] bg-surface shadow-lg text-center relative overflow-hidden group">
+                    <div class="absolute -top-20 -right-20 w-48 h-48 rounded-full opacity-10 transition-transform group-hover:scale-110 blur-3xl"
+                         th:classappend="${ranking.rankingScore >= 80 ? 'bg-emerald-500' : (ranking.rankingScore >= 60 ? 'bg-amber-500' : 'bg-rose-500')}"></div>
+
+                    <div class="w-32 h-32 mx-auto rounded-full flex items-center justify-center text-5xl font-black text-white shadow-xl mb-6 relative z-10"
+                         th:classappend="${ranking.rankingScore >= 80 ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/40' : (ranking.rankingScore >= 60 ? 'bg-gradient-to-br from-amber-400 to-amber-600 shadow-amber-500/40' : 'bg-gradient-to-br from-rose-400 to-rose-600 shadow-rose-500/40')}">
+                        <span th:text="${#numbers.formatDecimal(ranking.rankingScore, 1, 1)}">85.0</span>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-foreground mb-1 relative z-10" th:text="${candidate.fullName}">John Doe</h3>
+                    <p class="text-[10px] font-bold tracking-widest uppercase text-foreground-subtle mb-6 relative z-10"><i class="bi bi-envelope mr-1"></i> <span th:text="${candidate.email}"></span></p>
+
+                    <div class="grid gap-3 text-left relative z-10">
+                        <div class="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex items-center gap-3">
+                            <i class="bi bi-telephone w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center"></i>
+                            <div>
+                                <div class="text-[9px] font-bold uppercase tracking-widest text-foreground-subtle">Phone Number</div>
+                                <div class="text-sm font-black text-foreground-muted" th:text="${candidate.phone != null ? candidate.phone : 'UNVERIFIED'}"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex items-center gap-3">
+                            <i class="bi bi-briefcase w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"></i>
+                            <div>
+                                <div class="text-[9px] font-bold uppercase tracking-widest text-foreground-subtle">Experience</div>
+                                <div class="text-sm font-black text-foreground-muted" th:text="${candidate.experienceYears != null ? candidate.experienceYears + ' years' : 'UNKNOWN'}"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex flex-col gap-1">
+                            <div class="text-[9px] font-bold uppercase tracking-widest text-foreground-subtle flex items-center gap-2 mb-1"><i class="bi bi-mortarboard text-sky-500"></i> Education</div>
+                            <div class="text-xs font-bold text-foreground-muted leading-tight" th:text="${candidate.education != null ? candidate.education : 'NOT LOGGED'}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meta/Ranking Card -->
+                <div class="modern-card p-6 bg-surface border border-white/[0.08] relative overflow-hidden group">
+                    <i class="bi bi-heptagon-half absolute -right-6 -bottom-6 text-8xl text-accent opacity-20 group-hover:scale-110 transition-transform"></i>
+                    <h5 class="font-black flex items-center gap-2 mb-6">
+                        <i class="bi bi-info-circle-fill text-indigo-400"></i> Ranking Metadata
+                    </h5>
+
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex justify-between items-center border-b border-white/[0.04] pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Rank Position</span>
+                            <div class="font-black text-base">
+                                <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded mr-1" th:text="'#' + ${ranking.rankPosition}"></span>
+                                <span class="text-foreground-muted text-xs text-normal">of <span th:text="${ranking.totalCandidatesRanked}"></span></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/[0.04] pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Percentile</span>
+                            <span class="font-black text-foreground" th:text="${#numbers.formatDecimal(ranking.percentile, 1, 1)} + '%'"></span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-white/[0.04] pb-3">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Calculated At</span>
+                            <span class="font-black text-foreground text-xs" th:text="${#temporals.format(ranking.rankingDate, 'dd MMM yy HH:mm')}"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">Version</span>
+                            <span class="font-black text-indigo-400 px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded text-xs" th:text="${ranking.rankingCriteriaVersion}">v1.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weights Configuration Summary -->
+                <div class="modern-card p-6 border border-white/[0.08] bg-surface relative overflow-hidden shadow-inner">
+                    <h5 class="font-black text-foreground flex items-center gap-2 mb-4">
+                        <i class="bi bi-sliders text-amber-400"></i> Applied Weights
+                    </h5>
+                    <div class="flex flex-wrap gap-2">
+                        <div class="bg-accent/20 border border-accent/20 text-accent px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-indigo-200 shadow-sm flex-grow text-center">
+                            SKL: <span th:text="${ranking.skillsWeight} + '%'"></span>
+                        </div>
+                        <div class="bg-amber-500/20 border border-amber-500/30 text-amber-400 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-amber-200 shadow-sm flex-grow text-center">
+                            EXP: <span th:text="${ranking.experienceWeight} + '%'"></span>
+                        </div>
+                        <div class="bg-sky-100 text-sky-700 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-sky-200 shadow-sm flex-grow text-center">
+                            EDU: <span th:text="${ranking.educationWeight} + '%'"></span>
+                        </div>
+                        <div th:if="${ranking.personalityWeight > 0}" class="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-purple-200 shadow-sm flex-grow text-center">
+                            PER: <span th:text="${ranking.personalityWeight} + '%'"></span>
+                        </div>
+                        <div th:if="${ranking.culturalFitWeight > 0}" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border border-rose-200 shadow-sm flex-grow text-center">
+                            CUL: <span th:text="${ranking.culturalFitWeight} + '%'"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Center Column: Deep Detail Visualization -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Factor Breakdown Bar Charts -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-lg">
+                    <div class="p-6 bg-white/[0.04] border-b border-white/[0.08] flex justify-between items-center backdrop-blur-sm">
+                        <h5 class="font-black text-foreground flex items-center gap-2"><i class="bi bi-bar-chart-fill text-emerald-400"></i> Scoring Breakdown</h5>
+                    </div>
+                    
+                    <div class="p-6 space-y-6">
+                        
+                        <!-- Skills -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="font-black text-foreground-muted flex items-center gap-2"><i class="bi bi-braces text-accent bg-accent/10 p-1.5 rounded-lg"></i> Technical Skills</span>
+                                <div class="text-right">
+                                    <div class="text-xs font-bold text-foreground-subtle">Yield / Weight</div>
+                                    <span class="font-black text-accent text-lg" th:text="${#numbers.formatDecimal(ranking.weightedSkillsScore, 1, 1)}"></span>
+                                    <span class="font-bold text-slate-300">/</span>
+                                    <span class="font-bold text-foreground-subtle" th:text="${ranking.skillsWeight}"></span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-surface rounded-full h-3 shadow-inner overflow-hidden relative">
+                                <div class="bg-indigo-500 h-3 rounded-full absolute left-0 top-0 transition-all duration-1000" role="progressbar"
+                                     th:style="'width: ' + (${ranking.weightedSkillsScore} * 100 / ${ranking.skillsWeight}) + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Experience -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="font-black text-foreground-muted flex items-center gap-2"><i class="bi bi-briefcase text-amber-400 bg-amber-500/10 p-1.5 rounded-lg"></i> Experience</span>
+                                <div class="text-right">
+                                    <span class="font-black text-amber-400 text-lg" th:text="${#numbers.formatDecimal(ranking.weightedExperienceScore, 1, 1)}"></span>
+                                    <span class="font-bold text-slate-300">/</span>
+                                    <span class="font-bold text-foreground-subtle" th:text="${ranking.experienceWeight}"></span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-surface-hover rounded-full h-3 shadow-inner overflow-hidden relative">
+                                <div class="bg-amber-500 h-3 rounded-full absolute left-0 top-0 transition-all duration-1000 delay-100" role="progressbar"
+                                     th:style="'width: ' + (${ranking.weightedExperienceScore} * 100 / ${ranking.experienceWeight}) + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Education -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="font-black text-foreground-muted flex items-center gap-2"><i class="bi bi-mortarboard text-sky-500 bg-sky-50/10 p-1.5 rounded-lg"></i> Education</span>
+                                <div class="text-right">
+                                    <span class="font-black text-sky-600 text-lg" th:text="${#numbers.formatDecimal(ranking.weightedEducationScore, 1, 1)}"></span>
+                                    <span class="font-bold text-slate-300">/</span>
+                                    <span class="font-bold text-foreground-subtle" th:text="${ranking.educationWeight}"></span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-surface rounded-full h-3 shadow-inner overflow-hidden relative">
+                                <div class="bg-sky-500 h-3 rounded-full absolute left-0 top-0 transition-all duration-1000 delay-200" role="progressbar"
+                                     th:style="'width: ' + (${ranking.weightedEducationScore} * 100 / ${ranking.educationWeight}) + '%;'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Personality -->
+                        <div th:if="${ranking.personalityWeight > 0}">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="font-black text-foreground-muted flex items-center gap-2"><i class="bi bi-emoji-smile text-purple-500 bg-purple-50 p-1.5 rounded-lg"></i> Personality Traits</span>
+                                <div class="text-right">
+                                    <span class="font-black text-purple-600 text-lg" th:text="${#numbers.formatDecimal(ranking.weightedPersonalityScore, 1, 1)}"></span>
+                                    <span class="font-bold text-slate-300">/</span>
+                                    <span class="font-bold text-foreground-subtle" th:text="${ranking.personalityWeight}"></span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-surface rounded-full h-3 shadow-inner overflow-hidden relative">
+                                <div class="bg-purple-500 h-3 rounded-full absolute left-0 top-0 transition-all duration-1000 delay-300" role="progressbar"
+                                     th:style="'width: ' + (${ranking.weightedPersonalityScore} * 100 / ${ranking.personalityWeight}) + '%;'"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Process Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Operations Console -->
+                    <div class="modern-card p-6 bg-surface border border-white/[0.08] relative overflow-hidden group shadow-lg">
+                        <i class="bi bi-terminal absolute -right-6 -bottom-6 text-8xl text-white opacity-5"></i>
+                        <h5 class="font-black flex items-center gap-2 mb-6 text-foreground">
+                            <i class="bi bi-cpu-fill text-emerald-400"></i> Actions
+                        </h5>
+
+                        <div class="grid grid-cols-1 gap-2 relative z-10">
+                            <!-- Shortlist Toggle -->
+                            <button th:onclick="'shortlistCandidate(' + ${ranking.id} + ')'" th:if="${!ranking.shortlisted}" class="w-full px-4 py-3 rounded-xl bg-surface-hover border border-white/[0.08] text-foreground-subtle hover:text-amber-400 hover:border-amber-500/50 hover:bg-background transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center">
+                                <i class="bi bi-star mr-2"></i> Shortlist Candidate
+                            </button>
+                            <button th:onclick="'removeShortlist(' + ${ranking.id} + ')'" th:if="${ranking.shortlisted}" class="w-full px-4 py-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 hover:bg-amber-500/30 hover:border-amber-500/50 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center shadow-lg shadow-amber-500/20">
+                                <i class="bi bi-star-fill mr-2"></i> Shortlisted
+                            </button>
+
+                            <!-- Process Flow -->
+                            <button th:onclick="'scheduleInterview(' + ${ranking.id} + ')'" class="w-full px-4 py-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 hover:bg-sky-500/20 hover:text-sky-300 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center">
+                                <i class="bi bi-calendar-event mr-2"></i> Schedule Interview
+                            </button>
+                            
+                            <button data-clay-modal="#feedbackModal" class="w-full px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all text-xs font-black uppercase tracking-widest flex items-center justify-center">
+                                <i class="bi bi-chat-square-text mr-2"></i> Add Feedback
+                            </button>
+
+                            <!-- Nav -->
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <a th:href="@{/hr/candidates/{id}/resume/view(id=${ranking.candidate.id})}" target="_blank" class="w-full px-2 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-foreground hover:bg-white/[0.08] transition-all text-[10px] font-black uppercase tracking-widest flex flex-col items-center justify-center">
+                                    <i class="bi bi-file-earmark-pdf text-rose-400 text-lg mb-1"></i> View Resume
+                                </a>
+                                <a th:href="@{/skill-match/result/{id}(id=${ranking.skillMatchResult.id})}" th:if="${ranking.skillMatchResult != null}" class="w-full px-2 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-foreground hover:bg-white/[0.08] transition-all text-[10px] font-black uppercase tracking-widest flex flex-col items-center justify-center">
+                                    <i class="bi bi-hdd-network text-indigo-400 text-lg mb-1"></i> Match Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline Status and History -->
+                    <div class="space-y-6">
+                        
+                        <!-- Status Overrides -->
+                        <div class="modern-card p-6 bg-surface border border-white/[0.08]" th:classappend="${ranking.getHiringStatusBadgeClass()}">
+                            <h5 class="font-black text-foreground flex items-center gap-2 mb-4">
+                                <i class="bi bi-arrow-left-right text-sky-500"></i> Pipeline Status
+                            </h5>
+                            
+                            <select class="bg-background-elevated border border-white/[0.08] text-foreground-muted text-[10px] font-black tracking-widest uppercase rounded-xl focus:ring-sky-500 focus:border-sky-500 block w-full p-3 shadow-sm appearance-none cursor-pointer mb-4"
+                                    th:onchange="'updateStatus(' + ${ranking.id} + ', this.value)'">
+                                <option th:each="status : ${hiringStatuses}"
+                                        th:value="${status.name()}"
+                                        th:text="${status.displayName}"
+                                        th:selected="${ranking.hiringStatus != null and ranking.hiringStatus.name() == status.name()}">
+                                </option>
+                            </select>
+
+                            <div th:if="${ranking.shortlisted}" class="bg-amber-500/10 text-amber-400 p-3 rounded-xl text-xs font-bold border border-amber-500/20 shadow-inner mb-3 flex items-start gap-2">
+                                <i class="bi bi-star-fill text-amber-400 mt-0.5 shrink-0"></i>
+                                <div>
+                                    Shortlisted On
+                                    <div th:if="${ranking.shortlistDate}" class="opacity-70 mt-0.5 text-[9px] uppercase tracking-widest" th:text="${#temporals.format(ranking.shortlistDate, 'dd/MM/yy HH:mm')}"></div>
+                                    <div th:if="${ranking.shortlistNotes}" class="mt-1 italic font-medium" th:text="${ranking.shortlistNotes}"></div>
+                                </div>
+                            </div>
+
+                            <div th:if="${ranking.interviewScheduled}" class="bg-sky-500/10 text-sky-400 p-3 rounded-xl text-xs font-bold border border-sky-500/20 shadow-inner mb-3 flex items-start gap-2">
+                                <i class="bi bi-calendar-event-fill text-sky-500 mt-0.5 shrink-0"></i>
+                                <div>
+                                    Interview Scheduled
+                                    <div th:if="${ranking.interviewDate}" class="opacity-70 mt-0.5 text-[9px] uppercase tracking-widest" th:text="${#temporals.format(ranking.interviewDate, 'dd/MM/yy HH:mm')}"></div>
+                                    <div th:if="${ranking.interviewFeedback}" class="mt-1 text-foreground-muted font-medium p-2 bg-surface border border-white/[0.06] rounded-lg border border-sky-200/50" th:text="${ranking.interviewFeedback}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Overrides Note -->
+                        <div class="modern-card p-6 bg-surface border border-white/[0.08] shadow-inner">
+                            <h5 class="text-xs font-black uppercase tracking-widest text-foreground-subtle mb-2">Notes</h5>
+                            <textarea class="w-full bg-background-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-foreground-subtle focus:outline-none focus:border-indigo-500 transition-colors shadow-sm mb-3" rows="3" id="notes" placeholder="Add personal notes..." th:text="${ranking.notes}"></textarea>
+                            <button class="w-full py-2 rounded-xl bg-white/[0.08] text-foreground hover:bg-white/[0.12] transition-all text-[10px] font-black uppercase tracking-widest border border-white/[0.08]" onclick="updateNotes([[${ranking.id}]])">
+                                Save Notes
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Timeline Log -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-lg">
+                    <div class="p-6 bg-white/[0.04] border-b border-white/[0.08] flex justify-between items-center backdrop-blur-sm">
+                        <h5 class="font-black text-foreground flex items-center gap-2 text-sm"><i class="bi bi-clock-history text-foreground-subtle"></i> Status History</h5>
+                    </div>
+                    
+                    <div class="p-6 max-h-[300px] overflow-y-auto">
+                        <div th:if="${history.isEmpty()}" class="text-center py-6 text-foreground-subtle font-bold text-sm">
+                            <i class="bi bi-archive opacity-50 block text-3xl mb-2"></i>
+                            No History Logged
+                        </div>
+                        <div th:unless="${history.isEmpty()}" class="space-y-4 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/[0.08] before:to-transparent">
+                            
+                            <div th:each="hist : ${history}" class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                <div class="flex items-center justify-center w-5 h-5 rounded-full border border-white/[0.08] bg-surface-hover text-foreground-subtle group-[.is-active]:bg-indigo-500 group-[.is-active]:text-emerald-50 group-[.is-active]:border-indigo-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                                </div>
+                                <div class="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.5rem)] bg-surface p-3 rounded-xl border border-white/[0.08] shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <div class="text-[9px] font-bold tracking-widest uppercase text-foreground-subtle" th:text="${#temporals.format(hist.rankingDate, 'dd MMM yy HH:mm')}"></div>
+                                        <div class="font-black text-accent text-xs text-right">#<span th:text="${hist.rankPosition}"></span> (<span th:text="${#numbers.formatDecimal(hist.rankingScore, 1, 1)}"></span>%)</div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase" th:classappend="${hist.getHiringStatusBadgeClass()}" th:text="${hist.hiringStatus != null ? hist.hiringStatus.displayName : 'INIT'}"></span>
+                                        <span th:if="${hist.shortlisted}" class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase bg-amber-500/20 border border-amber-500/30 text-amber-400"><i class="bi bi-star-fill mr-0.5"></i> Shortlisted</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Background -->
+    <div id="feedbackModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-surface rounded-[32px] shadow-clay max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300 modal-content overflow-hidden border border-white/[0.08]">
+            <div class="bg-gradient-to-r from-emerald-500 to-indigo-500 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                <i class="bi bi-chat-square-text absolute -right-4 -bottom-4 text-8xl opacity-10"></i>
+                <h5 class="text-xl font-black relative z-10">Add Interview Feedback</h5>
+                <button type="button" class="close-modal w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/[0.04] transition-colors relative z-10">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="p-8 pb-4">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Feedback</p>
+                <textarea class="w-full bg-background-elevated border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-foreground-subtle focus:outline-none focus:border-emerald-500 transition-colors shadow-sm" id="feedbackText" rows="6" placeholder="Enter interview feedback..."></textarea>
+            </div>
+            <div class="p-6 pt-4 flex gap-3">
+                <button type="button" class="close-modal flex-1 py-3 rounded-xl bg-surface-hover border border-white/[0.08] text-foreground-muted font-bold uppercase tracking-widest text-xs hover:bg-white/[0.08] transition-colors">Cancel</button>
+                <button type="button" class="flex-1 w-full py-3 rounded-xl bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-400 shadow-sm shadow-emerald-500/20 transition-colors flex justify-center items-center" th:onclick="'submitFeedback(' + ${ranking.id} + ')'">
+                    <i class="bi bi-cloud-upload-fill mr-2"></i> Save Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Custom Modal Logic for Claymorphism
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggers = document.querySelectorAll('[data-clay-modal]');
+            const modals = document.querySelectorAll('.fixed.inset-0');
+            const closers = document.querySelectorAll('.close-modal');
+
+            triggers.forEach(t => {
+                t.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.querySelector(t.getAttribute('data-clay-modal'));
+                    if(target) {
+                        target.classList.remove('hidden');
+                        target.classList.add('flex');
+                        setTimeout(() => {
+                            target.classList.remove('opacity-0');
+                            target.querySelector('.modal-content').classList.remove('scale-95');
+                        }, 10);
+                    }
+                });
+            });
+
+            closers.forEach(c => {
+                c.addEventListener('click', () => {
+                    const modal = c.closest('.fixed.inset-0');
+                    if(modal) {
+                        modal.classList.add('opacity-0');
+                        modal.querySelector('.modal-content').classList.add('scale-95');
+                        setTimeout(() => {
+                            modal.classList.remove('flex');
+                            modal.classList.add('hidden');
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        function updateStatus(rankingId, status) {
+            const notes = prompt('Add note for history log (optional):', '');
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            fetch('/ranking/' + rankingId + '/hiring-status?status=' + status + '&notes=' + encodeURIComponent(notes || ''), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function updateNotes(rankingId) {
+            const notes = document.getElementById('notes').value;
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            fetch('/ranking/' + rankingId + '/notes?notes=' + encodeURIComponent(notes), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    alert('Notes saved successfully.');
+                }
+            });
+        }
+
+        function shortlistCandidate(rankingId) {
+            const notes = prompt('Add shortlist note (optional):', '');
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            fetch('/ranking/' + rankingId + '/shortlist?shortlisted=true&notes=' + encodeURIComponent(notes || ''), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function removeShortlist(rankingId) {
+            if (confirm('Remove candidate from shortlist?')) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                fetch('/ranking/' + rankingId + '/shortlist?shortlisted=false', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        function scheduleInterview(rankingId) {
+            const dateTime = prompt('Interview Date/Time (YYYY-MM-DD HH:MM):', new Date().toISOString().slice(0, 16).replace('T', ' '));
+            if (dateTime) {
+                const notes = prompt('Add interview note (optional):', '');
+                const interviewDate = new Date(dateTime).toISOString();
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+
+                fetch('/ranking/' + rankingId + '/schedule-interview?interviewDate=' + interviewDate + '&notes=' + encodeURIComponent(notes || ''), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        function submitFeedback(rankingId) {
+            const feedback = document.getElementById('feedbackText').value;
+            if (!feedback.trim()) {
+                alert('Feedback cannot be empty.');
+                return;
+            }
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            fetch('/ranking/' + rankingId + '/interview-feedback?feedback=' + encodeURIComponent(feedback), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    window.location.reload();
+                }
+            });
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

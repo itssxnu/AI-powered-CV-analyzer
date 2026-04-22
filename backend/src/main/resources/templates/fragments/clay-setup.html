@@ -1,0 +1,109 @@
+<!-- fragments/modern-setup.html -->
+<th:block th:fragment="tailwind-config">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration for High-Fidelity Claymorphism -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clay: {
+                            canvas: '#F4F1FA',
+                            foreground: '#332F3A',
+                            muted: '#635F69',
+                            accent: '#7C3AED',
+                            'accent-alt': '#DB2777',
+                            tertiary: '#0EA5E9',
+                            success: '#10B981',
+                            warning: '#F59E0B',
+                            cardBg: 'rgba(255, 255, 255, 0.75)'
+                        }
+                    },
+                    boxShadow: {
+                        claySurface: '30px 30px 60px #cdc6d9, -30px -30px 60px #ffffff, inset 10px 10px 20px rgba(139, 92, 246, 0.05), inset -10px -10px 20px rgba(255, 255, 255, 0.8)',
+                        clayCard: '16px 16px 32px rgba(160, 150, 180, 0.2), -10px -10px 24px rgba(255, 255, 255, 0.9), inset 6px 6px 12px rgba(139, 92, 246, 0.03), inset -6px -6px 12px rgba(255, 255, 255, 1)',
+                        clayButton: '12px 12px 24px rgba(139, 92, 246, 0.3), -8px -8px 16px rgba(255, 255, 255, 0.4), inset 4px 4px 8px rgba(255, 255, 255, 0.4), inset -4px -4px 8px rgba(0, 0, 0, 0.1)',
+                        clayButtonHover: '16px 16px 32px rgba(139, 92, 246, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.5), inset 4px 4px 8px rgba(255, 255, 255, 0.4), inset -4px -4px 8px rgba(0, 0, 0, 0.1)',
+                        clayPressed: 'inset 10px 10px 20px #d9d4e3, inset -10px -10px 20px #ffffff'
+                    },
+                    fontFamily: {
+                        sans: ['"DM Sans"', 'sans-serif'],
+                        heading: ['"Nunito"', 'sans-serif']
+                    },
+                    animation: {
+                        'clay-float': 'clay-float 8s ease-in-out infinite',
+                        'clay-float-delayed': 'clay-float-delayed 10s ease-in-out infinite',
+                        'clay-float-slow': 'clay-float-slow 12s ease-in-out infinite',
+                        'clay-breathe': 'clay-breathe 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'clay-float': {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-20px) rotate(2deg)' },
+                        },
+                        'clay-float-delayed': {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-15px) rotate(-2deg)' },
+                        },
+                        'clay-float-slow': {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-30px) rotate(5deg)' },
+                        },
+                        'clay-breathe': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.02)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-background-base text-foreground font-sans antialiased overflow-x-hidden min-h-screen relative z-0;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                @apply font-heading tracking-tight;
+            }
+        }
+        
+        @layer components {
+            .modern-card {
+                @apply relative overflow-hidden rounded-[32px] bg-modern-cardBg p-8 text-foreground shadow-modern-card backdrop-blur-xl transition-all duration-500;
+            }
+            .modern-card-hover {
+                @apply hover:-translate-y-2 hover:shadow-modern-card cursor-pointer;
+            }
+            .modern-btn {
+                @apply inline-flex items-center justify-center font-bold tracking-wide transition-all duration-200 rounded-[20px] h-14 px-8;
+            }
+            .modern-btn-primary {
+                @apply bg-gradient-to-br from-[#A78BFA] to-[#7C3AED] text-white shadow-modern-button hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-[0.92] active:shadow-inner;
+            }
+            .modern-btn-secondary {
+                @apply bg-white text-foreground shadow-modern-button hover:shadow-modern-card hover:-translate-y-1 active:scale-[0.92] active:shadow-inner;
+            }
+            .modern-btn-success {
+                @apply bg-gradient-to-br from-[#34D399] to-[#10B981] text-white shadow-modern-button hover:-translate-y-1 active:scale-[0.92] active:shadow-inner;
+            }
+            .modern-btn-amber {
+                @apply bg-gradient-to-br from-[#FCD34D] to-[#F59E0B] text-white shadow-modern-button hover:-translate-y-1 active:scale-[0.92] active:shadow-inner;
+            }
+            .modern-input {
+                @apply flex w-full border-0 bg-surface px-6 py-4 text-foreground text-lg shadow-inner rounded-[20px] focus:bg-white focus:ring-4 focus:ring-clay-accent/20 transition-all duration-200 placeholder:text-foreground-muted focus-visible:outline-none;
+            }
+            .modern-text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-clay-foreground via-clay-accent to-clay-accent-alt;
+            }
+        }
+    </style>
+</th:block>

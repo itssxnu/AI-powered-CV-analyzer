@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User - Admin</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1000px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <a th:href="@{/admin/users}" class="mt-1 w-12 h-12 rounded-full bg-white text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-person-plus-fill text-indigo-400"></i> Add User
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Create a New User
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-check-circle-fill text-xl text-emerald-400"></i> <span th:text="${message}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-xl text-rose-400"></i> <span th:text="${error}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-8">
+                <!-- Registration Form -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface shadow-lg overflow-hidden">
+                    <div class="h-2 w-full bg-gradient-to-r from-sky-400 to-indigo-500"></div>
+
+                    <form th:action="@{/admin/users/new}" method="post" class="p-6 sm:p-8 space-y-6">
+                        
+                        <div class="pb-4 border-b border-white/[0.04] mb-6">
+                            <h5 class="text-sm font-black uppercase tracking-widest text-foreground flex items-center gap-2">
+                                <i class="bi bi-person-vcard text-indigo-400"></i> Personal Information
+                            </h5>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">First Name <span class="text-sky-400">*</span></label>
+                                <input type="text" name="firstName" th:value="${user.firstName}" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Last Name <span class="text-sky-400">*</span></label>
+                                <input type="text" name="lastName" th:value="${user.lastName}" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Username <span class="text-sky-400">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle font-black">@</span>
+                                    <input type="text" name="username" th:value="${user.username}" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl pl-9 pr-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                </div>
+                                <p class="text-[9px] font-bold text-foreground-subtle mt-1 uppercase tracking-widest">Must be unique</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Email Address <span class="text-sky-400">*</span></label>
+                                <div class="relative">
+                                    <i class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle"></i>
+                                    <input type="email" name="email" th:value="${user.email}" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Password <span class="text-sky-400">*</span></label>
+                                <div class="relative">
+                                    <i class="bi bi-key absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle"></i>
+                                    <input type="password" name="password" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                </div>
+                                <p class="text-[9px] font-bold text-foreground-subtle mt-1 uppercase tracking-widest">Minimum 8 characters</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Phone Number</label>
+                                <div class="relative">
+                                    <i class="bi bi-telephone absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle"></i>
+                                    <input type="tel" name="phone" th:value="${user.phone}" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pb-4 border-b border-white/[0.04] mb-6 mt-8">
+                            <h5 class="text-sm font-black uppercase tracking-widest text-foreground flex items-center gap-2">
+                                <i class="bi bi-shield-lock-fill text-accent"></i> Role & Status
+                            </h5>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Role <span class="text-sky-400">*</span></label>
+                                <select name="role" required class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted font-bold focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                    <option value="">Select Role</option>
+                                    <option value="CANDIDATE">Candidate</option>
+                                    <option value="HR">HR Manager</option>
+                                    <option value="ADMIN">Administrator</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col justify-center">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-3">Account Status</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="active" th:checked="${user.active != null ? user.active : true}" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-white/[0.08] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                    <span class="ml-3 text-sm font-black uppercase tracking-widest text-foreground-muted">Active</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Skills</label>
+                                <textarea name="skills" rows="3" th:text="${user.skills}" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors" placeholder="Java, Python..."></textarea>
+                                <p class="text-[9px] font-bold text-foreground-subtle mt-1 uppercase tracking-widest">Comma-separated list (e.g. Java, Python)</p>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Education</label>
+                                    <input type="text" name="education" th:value="${user.education}" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors" placeholder="Highest degree achieved">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Years of Experience</label>
+                                    <input type="number" name="experienceYears" th:value="${user.experienceYears}" min="0" max="50" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-colors">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-white/[0.04] flex items-center gap-4">
+                            <button type="submit" class="modern-btn bg-indigo-500 text-white shadow-indigo-500/30 hover:bg-indigo-400 font-black">
+                                <i class="bi bi-person-plus-fill mr-2"></i> Save User
+                            </button>
+                            <a th:href="@{/admin/users}" class="text-sm font-bold uppercase tracking-widest text-foreground-subtle hover:text-foreground transition-colors">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-4">
+                
+                <div class="modern-card p-6 bg-slate-900 border-0 text-white relative overflow-hidden h-full">
+                    <i class="bi bi-shield-lock-fill absolute -bottom-10 -right-10 text-[180px] text-white opacity-5"></i>
+                    
+                    <h5 class="text-sm font-black uppercase tracking-widest text-indigo-400 mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
+                        <i class="bi bi-shield-check"></i> User Provisioning Guide
+                    </h5>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white/5 border border-white/10 p-4 rounded-xl">
+                            <h6 class="font-bold text-slate-200 text-xs mb-1 uppercase tracking-wider flex items-center gap-2">
+                                <i class="bi bi-asterisk text-indigo-400"></i> Unique Identifiers
+                            </h6>
+                            <p class="text-[10px] text-foreground-subtle leading-relaxed font-medium">Username and email must be unique across the system.</p>
+                        </div>
+                        
+                        <div class="bg-white/5 border border-white/10 p-4 rounded-xl">
+                            <h6 class="font-bold text-slate-200 text-xs mb-1 uppercase tracking-wider flex items-center gap-2">
+                                <i class="bi bi-key-fill text-amber-400"></i> Password Security
+                            </h6>
+                            <p class="text-[10px] text-foreground-subtle leading-relaxed font-medium">Passwords are securely hashed before being saved to the database.</p>
+                        </div>
+
+                        <div class="bg-white/5 border border-white/10 p-4 rounded-xl">
+                            <h6 class="font-bold text-slate-200 text-xs mb-1 uppercase tracking-wider flex items-center gap-2">
+                                <i class="bi bi-person-badge-fill text-emerald-400"></i> Role Assignment
+                            </h6>
+                            <p class="text-[10px] text-foreground-subtle leading-relaxed font-medium">Assigning the ADMIN role grants full system access. Use with caution.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

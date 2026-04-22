@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Generate Rankings - ' + ${job.title}">Generate Rankings</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <style>
+        /* Custom Modern Slider Range Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            background: #e2e8f0;
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #6366f1; /* Indigo-500 default */
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Apply dynamic colors to thumbs based on data-color attribute or ID */
+        #skillsWeight::-webkit-slider-thumb { background: #10b981; } /* Emerald */
+        #experienceWeight::-webkit-slider-thumb { background: #f59e0b; } /* Amber */
+        #educationWeight::-webkit-slider-thumb { background: #0ea5e9; } /* Sky */
+        #personalityWeight::-webkit-slider-thumb { background: #8b5cf6; } /* Purple */
+        #culturalWeight::-webkit-slider-thumb { background: #f43f5e; } /* Rose */
+    </style>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <a th:href="@{/ranking/job/{id}(id=${job.id})}" class="mt-1 w-12 h-12 rounded-full bg-surface text-foreground flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-cpu-fill text-accent"></i> Generate Rankings
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Job: <span class="text-accent" th:text="${job.title}">Job</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-accent/10/80 border border-indigo-100 px-4 py-2 rounded-xl text-accent-bright text-xs font-bold uppercase tracking-widest shadow-sm backdrop-blur-sm flex items-center gap-2">
+                <i class="bi bi-info-circle-fill text-accent"></i> Adjust the weights to calculate candidate scores. Total weight limit: 100%.
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Configurator -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Macro Presets -->
+                <div class="modern-card p-6 border border-white/[0.08]">
+                    <h5 class="text-sm font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-2"><i class="bi bi-magic text-amber-400"></i> Quick Presets</h5>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        
+                        <div class="preset-card cursor-pointer group rounded-2xl border-2 border-white/[0.04] hover:border-indigo-400 bg-white/[0.02] hover:bg-accent/10/30 transition-all p-5 text-center relative overflow-hidden" onclick="setPreset('balanced')">
+                            <i class="bi bi-pie-chart-fill text-3xl mb-3 block text-slate-300 group-hover:text-accent transition-colors"></i>
+                            <h6 class="font-black text-foreground-muted mb-1">Balanced</h6>
+                            <p class="text-[9px] font-bold text-foreground-subtle uppercase tracking-widest line-clamp-2">SKL 40% | EXP 30% | EDU 30%</p>
+                            <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        </div>
+
+                        <div class="preset-card cursor-pointer group rounded-2xl border-2 border-white/[0.04] hover:border-emerald-400 bg-white/[0.02] hover:bg-emerald-500/10/30 transition-all p-5 text-center relative overflow-hidden" onclick="setPreset('skill-focused')">
+                            <i class="bi bi-tools text-3xl mb-3 block text-slate-300 group-hover:text-emerald-400 transition-colors"></i>
+                            <h6 class="font-black text-foreground-muted mb-1">Skills Focused</h6>
+                            <p class="text-[9px] font-bold text-foreground-subtle uppercase tracking-widest line-clamp-2">SKL 60% | EXP 25% | EDU 15%</p>
+                            <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        </div>
+
+                        <div class="preset-card cursor-pointer group rounded-2xl border-2 border-white/[0.04] hover:border-amber-400 bg-white/[0.02] hover:bg-amber-500/10/30 transition-all p-5 text-center relative overflow-hidden" onclick="setPreset('experience-focused')">
+                            <i class="bi bi-briefcase-fill text-3xl mb-3 block text-slate-300 group-hover:text-amber-400 transition-colors"></i>
+                            <h6 class="font-black text-foreground-muted mb-1">Experience Focused</h6>
+                            <p class="text-[9px] font-bold text-foreground-subtle uppercase tracking-widest line-clamp-2">SKL 30% | EXP 50% | EDU 20%</p>
+                            <div class="absolute inset-0 bg-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Main Form -->
+                <div class="modern-card p-0 border border-white/[0.08] shadow-lg overflow-hidden relative">
+                    <!-- Progress bar on top to show total weight -->
+                    <div class="h-1.5 w-full bg-surface">
+                        <div id="totalWeightProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+
+                    <div class="p-6 sm:p-8">
+                        <form th:action="@{/ranking/job/{id}/generate(id=${job.id})}" method="post" id="weightForm" class="space-y-8">
+
+                            <!-- Skills -->
+                            <div class="space-y-3 p-4 bg-emerald-500/10/30 rounded-2xl border border-emerald-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-braces bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-1.5 rounded-lg"></i> Skills Weight
+                                    </label>
+                                    <span class="text-xl font-black text-emerald-400" id="skillsValue">50%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="skillsWeight" name="skillsWeight" min="0" max="100" step="5" value="50" oninput="updateWeight('skills', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="space-y-3 p-4 bg-amber-500/10/30 rounded-2xl border border-amber-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-briefcase bg-amber-500/20 border border-amber-500/30 text-amber-400 p-1.5 rounded-lg"></i> Experience Weight
+                                    </label>
+                                    <span class="text-xl font-black text-amber-400" id="experienceValue">30%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="experienceWeight" name="experienceWeight" min="0" max="100" step="5" value="30" oninput="updateWeight('experience', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="space-y-3 p-4 bg-sky-50/30 rounded-2xl border border-sky-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-mortarboard-fill bg-sky-100 text-sky-600 p-1.5 rounded-lg"></i> Education Weight
+                                    </label>
+                                    <span class="text-xl font-black text-sky-600" id="educationValue">20%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="educationWeight" name="educationWeight" min="0" max="100" step="5" value="20" oninput="updateWeight('education', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Soft Skill Toggles area -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/[0.04]">
+                                <!-- Personality -->
+                                <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-4 transition-colors p-focus-within:border-purple-300">
+                                    <div class="flex items-center mb-4">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="includePersonality" onchange="togglePersonality()" class="w-4 h-4 text-accent bg-white border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        </div>
+                                        <div class="ml-3 text-sm flex-1">
+                                            <label for="includePersonality" class="font-black uppercase tracking-widest text-foreground-muted cursor-pointer flex items-center gap-2">
+                                                <i class="bi bi-emoji-smile text-purple-500"></i> Personality
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="personalitySection" class="hidden space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-foreground-subtle uppercase tracking-widest">Weighting</span>
+                                            <span class="text-lg font-black text-purple-600" id="personalityValue">0%</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <input type="range" id="personalityWeight" name="personalityWeight" min="0" max="100" step="5" value="0" oninput="updateWeight('personality', this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cultural -->
+                                <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-4 transition-colors p-focus-within:border-rose-300">
+                                    <div class="flex items-center mb-4">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="includeCultural" onchange="toggleCultural()" class="w-4 h-4 text-accent bg-white border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        </div>
+                                        <div class="ml-3 text-sm flex-1">
+                                            <label for="includeCultural" class="font-black uppercase tracking-widest text-foreground-muted cursor-pointer flex items-center gap-2">
+                                                <i class="bi bi-people-fill text-rose-400"></i> Cultural Fit
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="culturalSection" class="hidden space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-foreground-subtle uppercase tracking-widest">Weighting</span>
+                                            <span class="text-lg font-black text-rose-400" id="culturalValue">0%</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <input type="range" id="culturalWeight" name="culturalFitWeight" min="0" max="100" step="5" value="0" oninput="updateWeight('cultural', this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional Meta inputs -->
+                            <div class="space-y-4 pt-6 border-t border-white/[0.04]">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Configuration Name (Optional)</label>
+                                    <input type="text" name="configName" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-background-elevated transition-colors shadow-sm" placeholder="e.g. Q3 Technical Logic String">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Notes (Optional)</label>
+                                    <textarea name="description" rows="2" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-background-elevated transition-colors shadow-sm" placeholder="Document parameter reasoning..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Total Summary Sticky Footer equivalent -->
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl border-x border-b border-t-0 shadow-sm relative overflow-hidden" id="totalWeightContainer" style="box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06); border-color: #a7f3d0; background-color: #ecfdf5;">
+                                <div class="relative z-10 flex flex-col items-center sm:items-start text-emerald-400" id="totalWeightStatus">
+                                    <span class="font-black text-2xl flex items-center gap-2"><i class="bi bi-diagram-3-fill"></i> TOTAL: <span id="totalWeightDisplay">100</span>%</span>
+                                    <span class="text-xs font-bold uppercase tracking-widest opacity-80" id="totalWeightMessage">Parameters Valid</span>
+                                </div>
+                                <button type="submit" id="generateBtn" class="w-full sm:w-auto modern-btn bg-indigo-600 text-white shadow-indigo-500/30 hover:bg-indigo-500 hover:-translate-y-1 relative z-10 font-black">
+                                    <i class="bi bi-cpu-fill mr-2"></i> Generate Rankings
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Readiness Constraints -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <div class="modern-card p-6 border-0 bg-surface relative overflow-hidden h-full">
+                    <i class="bi bi-shield-lock absolute -bottom-10 -right-10 text-[180px] text-white opacity-5"></i>
+                    
+                    <h5 class="text-sm font-black uppercase tracking-widest text-indigo-300 mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
+                        <i class="bi bi-hdd-network"></i> Prerequisites
+                    </h5>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-start gap-4 backdrop-blur-sm">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20 text-white">
+                                <i class="bi bi-check-lg text-xl"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-bold text-emerald-400 text-sm mb-1 uppercase tracking-wider">Candidate Pool Required</h6>
+                                <p class="text-xs text-slate-300 leading-relaxed font-medium">Candidates have applied for this job.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-start gap-4 backdrop-blur-sm">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20 text-white">
+                                <i class="bi bi-check-lg text-xl"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-bold text-emerald-400 text-sm mb-1 uppercase tracking-wider">Skill Extraction Complete</h6>
+                                <p class="text-xs text-slate-300 leading-relaxed font-medium">Candidate skills have been extracted.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl flex items-start gap-4 backdrop-blur-sm mt-8 border-dashed">
+                            <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500 flex items-center justify-center shrink-0 text-indigo-400">
+                                <i class="bi bi-clock-fill text-sm"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-bold text-indigo-300 text-sm mb-1 uppercase tracking-wider">Ready to Generate</h6>
+                                <p class="text-xs text-foreground-subtle leading-relaxed font-medium">Configure weights and click Generate Rankings.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let skills = 50;
+        let experience = 30;
+        let education = 20;
+        let personality = 0;
+        let cultural = 0;
+
+        function updateWeight(type, value) {
+            switch(type) {
+                case 'skills':
+                    skills = parseInt(value);
+                    document.getElementById('skillsValue').textContent = value + '%';
+                    break;
+                case 'experience':
+                    experience = parseInt(value);
+                    document.getElementById('experienceValue').textContent = value + '%';
+                    break;
+                case 'education':
+                    education = parseInt(value);
+                    document.getElementById('educationValue').textContent = value + '%';
+                    break;
+                case 'personality':
+                    personality = parseInt(value);
+                    document.getElementById('personalityValue').textContent = value + '%';
+                    break;
+                case 'cultural':
+                    cultural = parseInt(value);
+                    document.getElementById('culturalValue').textContent = value + '%';
+                    break;
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const total = skills + experience + education + personality + cultural;
+            const totalElementDisplay = document.getElementById('totalWeightDisplay');
+            const totalElementContainer = document.getElementById('totalWeightContainer');
+            const totalElementStatus = document.getElementById('totalWeightStatus');
+            const totalElementMessage = document.getElementById('totalWeightMessage');
+            const generateBtn = document.getElementById('generateBtn');
+            const progressBar = document.getElementById('totalWeightProgressBar');
+
+            totalElementDisplay.textContent = total;
+            progressBar.style.width = Math.min(100, total) + '%';
+
+            if (total === 100) {
+                // Valid State: Emerald
+                totalElementContainer.style.backgroundColor = '#ecfdf5'; // emerald-50
+                totalElementContainer.style.borderColor = '#a7f3d0'; // emerald-200
+                totalElementContainer.style.boxShadow = '0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06)';
+                
+                totalElementStatus.className = 'relative z-10 flex flex-col items-center sm:items-start text-emerald-400';
+                totalElementMessage.textContent = 'Parameters Valid';
+                
+                progressBar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                // Invalid State: Rose
+                totalElementContainer.style.backgroundColor = '#fff1f2'; // rose-50
+                totalElementContainer.style.borderColor = '#fecdd3'; // rose-200
+                totalElementContainer.style.boxShadow = '0 4px 6px -1px rgba(244, 63, 94, 0.1), 0 2px 4px -1px rgba(244, 63, 94, 0.06)';
+                
+                totalElementStatus.className = 'relative z-10 flex flex-col items-center sm:items-start text-rose-400';
+                
+                if (total > 100) {
+                    totalElementMessage.textContent = 'Oversaturated Input';
+                    progressBar.className = 'h-full bg-rose-500 transition-all duration-300';
+                } else {
+                    totalElementMessage.textContent = 'Undersaturated Input';
+                    progressBar.className = 'h-full bg-amber-500 transition-all duration-300';
+                }
+
+                generateBtn.disabled = true;
+                generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function togglePersonality() {
+            const section = document.getElementById('personalitySection');
+            const checkbox = document.getElementById('includePersonality');
+
+            if (checkbox.checked) {
+                section.classList.remove('hidden');
+                personality = 10; // Default value
+                document.getElementById('personalityWeight').value = 10;
+                document.getElementById('personalityValue').textContent = '10%';
+
+                // Adjust other weights
+                skills = Math.max(0, skills - 5);
+                experience = Math.max(0, experience - 3);
+                education = Math.max(0, education - 2);
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            } else {
+                section.classList.add('hidden');
+                personality = 0;
+                document.getElementById('personalityWeight').value = 0;
+                document.getElementById('personalityValue').textContent = '0%';
+
+                // Restore weights
+                skills = 50;
+                experience = 30;
+                education = 20;
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            }
+            calculateTotal();
+        }
+
+        function toggleCultural() {
+            const section = document.getElementById('culturalSection');
+            const checkbox = document.getElementById('includeCultural');
+
+            if (checkbox.checked) {
+                section.classList.remove('hidden');
+                cultural = 10; // Default value
+                document.getElementById('culturalWeight').value = 10;
+                document.getElementById('culturalValue').textContent = '10%';
+
+                // Adjust other weights
+                skills = Math.max(0, skills - 5);
+                experience = Math.max(0, experience - 3);
+                education = Math.max(0, education - 2);
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            } else {
+                section.classList.add('hidden');
+                cultural = 0;
+                document.getElementById('culturalWeight').value = 0;
+                document.getElementById('culturalValue').textContent = '0%';
+
+                // Restore weights
+                skills = 50;
+                experience = 30;
+                education = 20;
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            }
+            calculateTotal();
+        }
+
+        function setPreset(type) {
+            // Reset optional sections
+            document.getElementById('includePersonality').checked = false;
+            document.getElementById('includeCultural').checked = false;
+            document.getElementById('personalitySection').classList.add('hidden');
+            document.getElementById('culturalSection').classList.add('hidden');
+            personality = 0;
+            cultural = 0;
+
+            // Remove selected classes from all
+            document.querySelectorAll('.preset-card').forEach(card => {
+                card.classList.remove('border-emerald-500', 'border-indigo-500', 'border-amber-500');
+                card.classList.add('border-white/[0.04]');
+            });
+
+
+            switch(type) {
+                case 'balanced':
+                    skills = 40;
+                    experience = 30;
+                    education = 30;
+                    event.currentTarget.classList.replace('border-white/[0.04]', 'border-indigo-500');
+                    break;
+                case 'skill-focused':
+                    skills = 60;
+                    experience = 25;
+                    education = 15;
+                    event.currentTarget.classList.replace('border-white/[0.04]', 'border-emerald-500');
+                    break;
+                case 'experience-focused':
+                    skills = 30;
+                    experience = 50;
+                    education = 20;
+                    event.currentTarget.classList.replace('border-white/[0.04]', 'border-amber-500');
+                    break;
+            }
+
+            // Update all inputs
+            document.getElementById('skillsWeight').value = skills;
+            document.getElementById('experienceWeight').value = experience;
+            document.getElementById('educationWeight').value = education;
+
+            document.getElementById('skillsValue').textContent = skills + '%';
+            document.getElementById('experienceValue').textContent = experience + '%';
+            document.getElementById('educationValue').textContent = education + '%';
+
+            calculateTotal();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Resume - AI Recruitment</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8 text-center">
+
+        <!-- Alerts -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm mx-auto mb-6">
+            <i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-4"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm mx-auto mb-6">
+            <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-4"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="mb-8 relative z-20 flex justify-center">
+            <a th:href="@{/candidate/resume}" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-foreground-muted shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all font-bold text-sm">
+                <i class="bi bi-arrow-left text-lg"></i> Return to Hub
+            </a>
+        </div>
+
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4">Upload Your Resume</h1>
+            <p class="text-foreground-muted font-medium max-w-lg mx-auto leading-relaxed">Our AI engine expects a standard PDF. Upload your resume to begin the analysis process.</p>
+        </div>
+
+        <div class="modern-card p-6 sm:p-12 border-dashed border-4 border-white/60 bg-white/[0.06] group hover:bg-surface border border-white/[0.06] transition-colors mx-auto relative overflow-hidden">
+            
+            <i class="bi bi-cloud-arrow-up text-8xl absolute -right-6 top-6 opacity-5 group-hover:opacity-10 transition-opacity"></i>
+            
+            <form th:action="@{/candidate/resume/upload}" method="post" enctype="multipart/form-data" id="uploadForm" class="relative z-10 flex flex-col items-center justify-center">
+                
+                <div class="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-400 to-clay-accent text-white flex items-center justify-center text-5xl shadow-modern-button mb-8 group-hover:-translate-y-2 group-hover:shadow-modern-buttonHover transition-all duration-300">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                </div>
+                
+                <h3 class="text-2xl font-black mb-2">Select Resume</h3>
+                <p class="text-sm font-bold uppercase tracking-widest text-foreground-muted mb-8">PDF format (Max 5MB)</p>
+
+                <input type="file" id="fileInput" name="resumeFile" accept=".pdf" required class="hidden" onchange="handleFileSelect(this)">
+                
+                <button type="button" onclick="document.getElementById('fileInput').click()" class="modern-btn modern-btn-primary mb-6">
+                    <i class="bi bi-search mr-2"></i> Browse Directory
+                </button>
+
+                <!-- Hidden file info overlay -->
+                <div id="fileInfo" class="hidden w-full max-w-sm bg-surface p-4 rounded-xl shadow-inner border border-white mt-4 flex items-center justify-between transition-all">
+                    <div class="text-left flex-1 min-w-0 pr-4">
+                        <p id="fileName" class="font-bold text-accent-bright text-sm truncate uppercase tracking-wide"></p>
+                        <p id="fileSize" class="text-xs font-bold text-foreground-muted font-mono"></p>
+                    </div>
+                    <button type="button" onclick="clearFile()" class="w-8 h-8 rounded bg-white text-rose-400 shadow-sm hover:scale-105 transition-transform flex items-center justify-center shrink-0">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="w-full mt-10 pt-8 border-t border-white/[0.08]">
+                    <button type="submit" id="uploadBtn" disabled class="modern-btn modern-btn-success w-full opacity-50 cursor-not-allowed">
+                        <i class="bi bi-cloud-upload-fill mr-2"></i> Upload Document
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- AI Pipeline Visual -->
+        <h4 class="text-xl font-black mb-8 mt-16 flex justify-center items-center gap-3"><i class="bi bi-hdd-network text-accent"></i> How it Works</h4>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+            
+            <div class="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-clay-muted/10 via-clay-accent to-emerald-400 -translate-y-1/2 hidden md:block rounded-full"></div>
+
+            <div class="flex flex-col items-center relative z-10 group">
+                <div class="w-16 h-16 rounded-2xl bg-surface shadow-sm border border-white/10 text-accent flex items-center justify-center text-3xl mb-4 group-hover:-translate-y-2 transition-transform shadow-clayDeep"><i class="bi bi-upload"></i></div>
+                <h6 class="font-extrabold text-sm uppercase tracking-widest text-foreground">1. Upload</h6>
+                <p class="text-[10px] text-foreground-muted font-bold mt-1 text-center max-w-[120px]">Upload Document</p>
+            </div>
+            <div class="flex flex-col items-center relative z-10 group md:delay-75">
+                <div class="w-16 h-16 rounded-2xl bg-surface shadow-sm border border-white/10 text-accent flex items-center justify-center text-3xl mb-4 group-hover:-translate-y-2 transition-transform shadow-clayDeep"><i class="bi bi-cpu-fill"></i></div>
+                <h6 class="font-extrabold text-sm uppercase tracking-widest text-foreground">2. Analyze</h6>
+                <p class="text-[10px] text-foreground-muted font-bold mt-1 text-center max-w-[120px]">AI Analysis</p>
+            </div>
+            <div class="flex flex-col items-center relative z-10 group md:delay-150">
+                <div class="w-16 h-16 rounded-2xl bg-surface shadow-sm border border-white/10 text-amber-400 flex items-center justify-center text-3xl mb-4 group-hover:-translate-y-2 transition-transform shadow-clayDeep"><i class="bi bi-graph-up-arrow"></i></div>
+                <h6 class="font-extrabold text-sm uppercase tracking-widest text-foreground">3. Evaluate</h6>
+                <p class="text-[10px] text-foreground-muted font-bold mt-1 text-center max-w-[120px]">Skill Matching</p>
+            </div>
+            <div class="flex flex-col items-center relative z-10 group md:delay-300">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 shadow-sm border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-3xl mb-4 group-hover:-translate-y-2 transition-transform shadow-clayDeep"><i class="bi bi-briefcase-fill"></i></div>
+                <h6 class="font-extrabold text-sm uppercase tracking-widest text-emerald-400">4. Match</h6>
+                <p class="text-[10px] text-foreground-muted font-bold mt-1 text-center max-w-[120px]">Job Recommendations</p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        function handleFileSelect(input) {
+            if(input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                if (file.type !== 'application/pdf') {
+                    alert('Error: Please upload a PDF file.');
+                    clearFile();
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Error: File size must be under 5MB.');
+                    clearFile();
+                    return;
+                }
+
+                fileName.textContent = file.name;
+                fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                fileInfo.classList.remove('hidden');
+                
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Error: Please select a file first.');
+            }
+        });
+    </script>
+</body>
+</html>

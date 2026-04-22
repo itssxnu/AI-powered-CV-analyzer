@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Jobs - AI Recruitment System</title>
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+
+        <!-- Header area -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight mb-2 flex items-center gap-4">
+                    <i class="bi bi-briefcase-fill text-accent text-4xl"></i> Job Operations
+                </h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                    <span sec:authorize="hasRole('ADMIN')">Global Scope: All Openings</span>
+                    <span sec:authorize="hasRole('HR')">My Local Listings</span>
+                </p>
+            </div>
+            
+            <a href="/jobs/create" class="modern-btn modern-btn-primary shrink-0">
+                <i class="bi bi-plus-lg mr-2"></i> Deploy New Role
+            </a>
+        </div>
+
+        <!-- Window Popup Alert -->
+        <script th:if="${message}" th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                setTimeout(function() {
+                    window.alert([[${message}]]);
+                }, 100);
+            });
+        </script>
+        <div th:if="${error}" class="fixed top-6 right-6 z-[100] bg-rose-500/90 backdrop-blur-md border border-rose-400 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 font-bold text-sm animate-fade-in-up">
+            <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-white/70 hover:text-white ml-2"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Data Grid Surface -->
+        <div class="modern-card p-0 overflow-hidden">
+            
+            <div th:if="${jobs.isEmpty()}" class="py-20 text-center">
+                <div class="w-24 h-24 rounded-3xl bg-surface text-slate-300 flex items-center justify-center text-5xl mx-auto shadow-inner mb-6 border border-white/[0.08]">
+                    <i class="bi bi-inboxes text-foreground-subtle"></i>
+                </div>
+                <h3 class="text-2xl font-black mb-2">Registry is Empty</h3>
+                <p class="text-foreground-muted font-medium mb-8">You have 0 active or historical job listings in your workspace.</p>
+                <a href="/jobs/create" class="modern-btn modern-btn-success">
+                    <i class="bi bi-plus-lg mr-2"></i> Initialise First Job
+                </a>
+            </div>
+
+            <div th:unless="${jobs.isEmpty()}" class="overflow-x-auto">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-white/[0.04] backdrop-blur-sm border-b border-white/[0.08] text-xs font-black uppercase tracking-widest text-foreground-subtle">
+                        <tr>
+                            <th class="py-4 px-6 w-16">UID</th>
+                            <th class="py-4 px-6">Definition</th>
+                            <th class="py-4 px-6">Location/Dept</th>
+                            <th class="py-4 px-6">Timeline</th>
+                            <th class="py-4 px-6 text-center">Inflow</th>
+                            <th class="py-4 px-6">Live State</th>
+                            <th class="py-4 px-6 text-right">Overrides</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.08] font-medium text-sm">
+                        
+                        <tr th:each="job : ${jobs}" class="hover:bg-accent/10/30 transition-colors group">
+                            
+                            <!-- ID -->
+                            <td class="py-4 px-6">
+                                <span class="px-2 py-1 bg-surface font-mono text-xs font-bold rounded text-foreground-muted border border-white/[0.08]" th:text="${'#' + job.id}"></span>
+                            </td>
+                            
+                            <!-- Title & Type -->
+                            <td class="py-4 px-6">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-foreground group-hover:text-accent transition-colors" th:text="${job.title}"></span>
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-1" th:text="${job.jobType.displayName}"></span>
+                                </div>
+                            </td>
+                            
+                            <!-- Dept -->
+                            <td class="py-4 px-6 text-foreground-muted">
+                                <div class="flex flex-col">
+                                    <span class="flex items-center gap-1.5"><i class="bi bi-building text-foreground-subtle"></i> <span th:text="${job.department}"></span></span>
+                                    <span class="text-xs text-foreground-subtle mt-1 flex items-center gap-1.5"><i class="bi bi-geo-alt text-foreground-subtle"></i> <span th:text="${job.location}"></span></span>
+                                </div>
+                            </td>
+                            
+                            <!-- Dates -->
+                            <td class="py-4 px-6">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-xs font-bold text-foreground-muted">Pub: <span th:text="${#temporals.format(job.postedDate, 'dd/MM/yyyy')}" class="font-mono bg-surface px-1 rounded"></span></span>
+                                    <span th:if="${job.expiryDate != null}" class="text-xs font-bold text-foreground-subtle">Exp: <span th:text="${#temporals.format(job.expiryDate, 'dd/MM/yyyy')}" class="font-mono"></span></span>
+                                </div>
+                            </td>
+
+                            <!-- App Count -->
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center gap-2">
+                                    <span class="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-xl border-2 border-white/[0.08] bg-white shadow-sm font-black text-foreground-muted" th:text="${job.applicationCount}"></span>
+                                    <span th:if="${job.pendingApplicationCount > 0}" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-200 text-amber-400 text-[10px] font-bold uppercase tracking-widest" title="Pending Reviews">
+                                        <i class="bi bi-hourglass-split"></i> <span th:text="${job.pendingApplicationCount}"></span>
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Active State -->
+                            <td class="py-4 px-6">
+                                <span th:if="${job.active and (job.expiryDate == null or job.expiryDate.isAfter(T(java.time.LocalDateTime).now()))}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-emerald-200/50">
+                                    <i class="bi bi-plugin"></i> Active
+                                </span>
+                                <span th:unless="${job.active}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface text-foreground-subtle rounded-lg text-[10px] font-bold uppercase tracking-widest border border-white/[0.08]/50">
+                                    <i class="bi bi-pause-circle"></i> Dormant
+                                </span>
+                                <span th:if="${job.expiryDate != null and job.expiryDate.isBefore(T(java.time.LocalDateTime).now())}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-rose-200/50">
+                                    <i class="bi bi-x-circle"></i> Expired
+                                </span>
+                            </td>
+
+                            <!-- Tools Grid -->
+                            <td class="py-4 px-6 text-right">
+                                <div class="inline-flex bg-surface p-1 rounded-xl shadow-inner border border-white/[0.08]">
+                                    <a th:href="@{/jobs/view/{id}(id=${job.id})}" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-white hover:text-accent hover:shadow-sm transition-all" title="Inspect">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <a th:href="@{/jobs/edit/{id}(id=${job.id})}" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-white hover:text-amber-400 hover:shadow-sm transition-all" title="Mutate Params">
+                                        <i class="bi bi-pen-fill"></i>
+                                    </a>
+                                    <a th:href="@{/jobs/{jobId}/applications(jobId=${job.id})}" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-white hover:text-emerald-400 hover:shadow-sm transition-all" title="Candidate Matrix">
+                                        <i class="bi bi-people-fill"></i>
+                                    </a>
+                                    <a th:href="@{/skill-match/job/{id}(id=${job.id})}" class="w-8 h-8 flex items-center justify-center rounded-lg text-accent bg-accent/10 border border-indigo-100 mx-1 hover:bg-indigo-600 hover:text-white transition-all shadow-sm" title="AI Skill Sort">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </a>
+                                    
+                                    <div class="w-px h-6 bg-slate-300 my-auto mx-1"></div>
+
+                                    <button th:if="${job.active}" th:data-id="${job.id}" onclick="toggleJobStatus(this.getAttribute('data-id'), false)" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-white/[0.08] transition-all" title="Halt Traffic">
+                                        <i class="bi bi-pause-fill"></i>
+                                    </button>
+                                    <button th:unless="${job.active}" th:data-id="${job.id}" onclick="toggleJobStatus(this.getAttribute('data-id'), true)" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-emerald-500/20 border border-emerald-500/30 hover:text-emerald-400 transition-all" title="Resume Traffic">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    
+                                    <button th:data-id="${job.id}" th:data-title="${job.title}" onclick="deleteJob(this.getAttribute('data-id'), this.getAttribute('data-title'))" class="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-subtle hover:bg-rose-500/20 border border-rose-500/30 hover:text-rose-400 transition-all ml-1" title="Nuke Profile">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function toggleJobStatus(jobId, active) {
+            const statusLabel = active ? 'RESUME / ACTIVATE' : 'HALT / DEACTIVATE';
+            if (confirm(`SYSTEM CALL:\nAre you sure you want to ${statusLabel} this node ID ${jobId}?`)) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+                
+                fetch(`/jobs/toggle-status/${jobId}?active=${active}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).then(response => {
+                    window.alert("Job status updated successfully");
+                    window.location.href = '/jobs/manage';
+                }).catch(err => alert("Protocol Error: " + err));
+            }
+        }
+
+        function deleteJob(jobId, jobTitle) {
+            if (confirm(`DESTRUCTIVE PROTOCOL:\nDelete target [${jobTitle}]?\n\nWARNING: Cascades through all connected application records.`)) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+                
+                fetch(`/jobs/delete/${jobId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).then(response => {
+                    window.alert("Job deleted successfully");
+                    window.location.href = '/jobs/manage';
+                }).catch(err => alert("Protocol Error: " + err));
+            }
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

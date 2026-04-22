@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - AI Recruitment</title>
+    
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body>
+
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[-20%] left-[10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[600px] h-[800px] rounded-[100%] blur-[120px] bg-indigo-500/10 top-[20%] right-[-10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+    <!-- Load Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-12">
+
+        <!-- Welcome Section -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight modern-text-gradient mb-2">Dashboard</h1>
+                <p class="text-lg text-foreground-muted">Manage your recruitment pipeline.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a th:href="@{/hr/candidates}" class="modern-btn modern-btn-secondary">
+                    <i class="bi bi-search mr-2 text-foreground-subtle"></i> Search
+                </a>
+                <button onclick="processAllCandidates()" class="modern-btn modern-btn-primary group">
+                    <i class="bi bi-cpu mr-2 text-white/80 group-active:scale-95 transition-transform duration-300"></i> Auto-Rank Resumes
+                </button>
+            </div>
+        </div>
+
+        <!-- 4-Stat Metric Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div class="modern-card flex flex-col p-5 sm:p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-foreground-muted tracking-wide uppercase">All Candidates</span>
+                    <i class="bi bi-people text-foreground-subtle text-lg"></i>
+                </div>
+                <span class="text-3xl sm:text-4xl font-semibold text-foreground" th:text="${totalCandidates}">0</span>
+            </div>
+
+            <div class="modern-card flex flex-col p-5 sm:p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-foreground-muted tracking-wide uppercase">Active</span>
+                    <i class="bi bi-person-check text-emerald-400 text-lg"></i>
+                </div>
+                <span class="text-3xl sm:text-4xl font-semibold text-foreground" th:text="${activeCandidates}">0</span>
+            </div>
+
+            <div class="modern-card flex flex-col p-5 sm:p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-foreground-muted tracking-wide uppercase">AI Processed</span>
+                    <i class="bi bi-robot text-accent-bright text-lg"></i>
+                </div>
+                <span class="text-3xl sm:text-4xl font-semibold text-foreground" th:text="${mlProcessed}">0</span>
+            </div>
+
+            <div class="modern-card flex flex-col p-5 sm:p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-foreground-muted tracking-wide uppercase">Resumes</span>
+                    <i class="bi bi-file-earmark-text text-amber-400 text-lg"></i>
+                </div>
+                <span class="text-3xl sm:text-4xl font-semibold text-foreground" th:text="${resumesCount}">0</span>
+            </div>
+        </div>
+
+        <!-- Main Content Area: Split View -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- Left Side -->
+            <div class="lg:col-span-2">
+                <div class="modern-card p-0 flex flex-col h-full bg-surface">
+                    <div class="p-6 border-b border-white/[0.04] flex justify-between items-center bg-white/[0.02]">
+                        <h3 class="text-xl font-semibold flex items-center gap-2">
+                            Top Ranked Candidates
+                        </h3>
+                        <span class="modern-badge modern-badge-accent">Live</span>
+                    </div>
+
+                    <div class="p-6 flex-1">
+                        <div th:if="${topCandidates != null and !topCandidates.isEmpty()}" class="space-y-4">
+                            <!-- Loop over Top Candidates -->
+                            <div th:each="candidate, stat : ${topCandidates}" class="relative bg-white/[0.03] rounded-xl p-5 border border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.05] transition-all duration-200 group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-surface border border-white/10 text-foreground-subtle flex items-center justify-center font-medium shadow-inner flex-shrink-0 group-hover:text-accent-bright group-hover:border-accent/30 transition-colors">
+                                        <span th:text="${stat.index + 1}">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-medium text-foreground mb-0.5 group-hover:text-white transition-colors" th:text="${candidate.fullName}">John Doe</h4>
+                                        <div class="flex items-center gap-2 text-xs text-foreground-muted">
+                                            <span th:text="${candidate.email}"></span>
+                                            <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                            <span th:text="${candidate.experienceYears != null ? candidate.experienceYears + ' yrs' : 'N/A'}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                 <div class="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0 justify-between sm:justify-end">
+                                    <span th:if="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="modern-badge modern-badge-success">Analyzed</span>
+                                    <span th:unless="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="modern-badge modern-badge-warning">Pending</span>
+                                    <a th:href="@{/hr/candidates/{id}(id=${candidate.id})}" class="text-sm font-medium text-foreground-muted hover:text-white transition-colors cursor-pointer flex items-center gap-1 group-hover:text-accent-bright">
+                                        View <i class="bi bi-arrow-right text-xs transition-transform group-hover:translate-x-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${topCandidates == null or topCandidates.isEmpty()}" class="h-full flex flex-col items-center justify-center py-16 text-center">
+                            <i class="bi bi-inbox text-4xl text-foreground-subtle mb-4"></i>
+                            <h4 class="text-lg font-medium text-foreground mb-1">No Profiles Analyzed</h4>
+                            <p class="text-sm text-foreground-muted mb-6 max-w-sm">Upload candidates and process them with AI to generate your ranking leaderboard.</p>
+                            <a th:href="@{/hr/candidates}" class="modern-btn modern-btn-secondary">Browse Candidates</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div class="flex flex-col gap-6">
+                 <div class="modern-card">
+                    <h3 class="text-lg font-semibold mb-4 border-b border-border-default pb-4">Actions</h3>
+                    <div class="flex flex-col space-y-2">
+                         <button onclick="processAllCandidates()" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/[0.05] transition-colors text-left group border border-transparent hover:border-white/[0.04]">
+                            <div class="w-8 h-8 rounded-md bg-white/[0.04] border border-white/[0.08] text-foreground-subtle flex items-center justify-center group-hover:text-accent-bright group-hover:border-accent/30 transition-colors">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-medium text-foreground group-hover:text-accent-bright transition-colors">Run Batch AI</h5>
+                                <p class="text-[11px] text-foreground-muted mt-0.5">Process pending CVs</p>
+                            </div>
+                        </button>
+                        
+                        <a th:href="@{/hr/candidates}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/[0.05] transition-colors text-left group block border border-transparent hover:border-white/[0.04]">
+                            <div class="w-8 h-8 rounded-md bg-white/[0.04] border border-white/[0.08] text-foreground-subtle flex items-center justify-center group-hover:text-blue-400 group-hover:border-blue-400/30 transition-colors">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-medium text-foreground group-hover:text-blue-400 transition-colors">Search</h5>
+                                <p class="text-[11px] text-foreground-muted mt-0.5">Advanced filtering</p>
+                            </div>
+                        </a>
+                    </div>
+                 </div>
+
+                <!-- Recent Activity -->
+                <div class="modern-card flex-1">
+                    <h3 class="text-lg font-semibold mb-4 border-b border-border-default pb-4">Recent</h3>
+                    
+                    <div th:if="${recentCandidates != null and !recentCandidates.isEmpty()}" class="space-y-4">
+                        <div th:each="candidate, stat : ${recentCandidates}" th:if="${stat.index < 4}" class="flex items-center justify-between group cursor-default">
+                            <div>
+                                <p class="text-sm font-medium text-foreground leading-tight group-hover:text-white transition-colors" th:text="${candidate.fullName}"></p>
+                                <span class="text-[10px] text-foreground-subtle" th:text="${#temporals.format(candidate.createdAt, 'MMM dd, yyyy')}"></span>
+                            </div>
+                            <span th:if="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="text-emerald-400">
+                                <i class="bi bi-check-circle"></i>
+                            </span>
+                            <span th:unless="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="text-amber-400 text-sm">
+                                <i class="bi bi-hourglass-split"></i>
+                            </span>
+                        </div>
+                        <div class="pt-2 border-t border-white/[0.04] mt-4">
+                             <a th:href="@{/hr/candidates}" class="text-xs font-medium text-accent hover:text-accent-bright transition-colors text-center block w-full pt-1">View All Activity</a>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${recentCandidates == null or recentCandidates.isEmpty()}" class="text-center py-6">
+                        <p class="text-sm text-foreground-subtle">No recent activity.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function processAllCandidates() {
+            alert('Batch ML processing initiated.');
+        }
+    </script>
+</body>
+</html>

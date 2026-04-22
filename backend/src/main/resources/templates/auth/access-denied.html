@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - AI Recruitment</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden m-0 p-0 antialiased flex flex-col justify-between">
+
+    <!-- Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <!-- Global Navigation -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="flex-1 flex flex-col items-center justify-center relative z-10 px-4">
+        
+        <div class="modern-card p-12 max-w-lg w-full text-center flex flex-col items-center group">
+            <div class="w-24 h-24 rounded-[32px] bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center text-5xl shadow-inner mb-8 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            
+            <h1 class="text-4xl font-black font-heading tracking-tight text-foreground mb-4">Access Denied</h1>
+            <p class="text-foreground-muted text-lg mb-8">
+                Your account (<span class="font-bold text-rose-400" sec:authentication="name">User</span>) does not have the required permissions to view this secure zone.
+            </p>
+
+            <a href="/" class="modern-btn modern-btn-primary w-full">
+                <i class="bi bi-house-door-fill mr-2"></i> Return Home
+            </a>
+            <div class="mt-6">
+                 <a href="/auth/logout" class="text-sm font-bold text-foreground-muted hover:text-rose-400 transition-colors uppercase tracking-widest"><i class="bi bi-box-arrow-right"></i> Logout instead</a>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="py-6 text-center text-sm font-bold text-foreground-muted uppercase tracking-widest select-none">
+        Security Exception - Error 403
+    </div>
+</body>
+</html>

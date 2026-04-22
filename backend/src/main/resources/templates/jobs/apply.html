@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Apply for ' + ${job.title}">Apply for Job</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <div class="flex items-center gap-4 mb-4">
+            <a th:href="@{/jobs/view/{id}(id=${job.id})}" class="w-12 h-12 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight text-foreground drop-shadow-sm">Job Application</h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm mt-1">Submit your profile</p>
+            </div>
+        </div>
+
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Target Data -->
+        <div class="modern-card p-6 sm:p-8 bg-gradient-to-br from-indigo-500 to-clay-accent text-white border-0 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <i class="bi bi-briefcase absolute -right-10 -bottom-10 text-9xl text-white opacity-10"></i>
+            <div>
+                <p class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-1">Applying For</p>
+                <h2 class="text-3xl font-black mb-3" th:text="${job.title}">Job Title</h2>
+                <div class="flex flex-wrap items-center gap-4 text-xs font-bold">
+                    <span class="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg"><i class="bi bi-building"></i> <span th:text="${job.department}"></span></span>
+                    <span class="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg"><i class="bi bi-geo-alt-fill"></i> <span th:text="${job.location}"></span></span>
+                </div>
+            </div>
+            <div class="text-right bg-white/10 p-4 rounded-[20px] backdrop-blur-sm border border-white/20 hidden sm:block">
+                <i class="bi bi-shield-check text-4xl text-emerald-300"></i>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <div class="lg:col-span-2 space-y-8">
+                
+                <form th:action="@{/jobs/apply/{id}(id=${job.id})}" method="post" enctype="multipart/form-data" id="applicationForm" class="modern-card p-6 sm:p-10 border-t-4 border-t-emerald-500 bg-surface border-x-white/[0.08] border-b-white/[0.08]">
+                    
+                    <h4 class="text-xl font-black flex items-center gap-3 border-b border-white/[0.08] pb-4 mb-8 text-foreground">
+                        <i class="bi bi-send-fill text-emerald-400"></i> Submit Application
+                    </h4>
+
+                    <!-- Ghost Upload Component -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-3 ml-2">Resume (PDF) <span class="text-rose-400">*</span></label>
+                        
+                        <div id="dropArea" class="relative group cursor-pointer" onclick="document.getElementById('resumeFile').click()">
+                            <!-- Dashed Border -->
+                            <div class="absolute inset-0 rounded-[32px] border-2 border-dashed border-white/10 group-hover:border-emerald-400 group-hover:bg-emerald-500/10/50 transition-all z-0"></div>
+                            
+                            <div class="relative z-10 py-16 px-6 text-center flex flex-col items-center justify-center pointer-events-none">
+                                <div class="w-20 h-20 rounded-[28px] bg-white/[0.04] text-slate-300 flex items-center justify-center text-4xl shadow-inner mb-6 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors border border-white/[0.08]">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                </div>
+                                <h5 class="font-black text-xl mb-2 text-foreground">Upload Resume</h5>
+                                <p class="text-foreground-muted font-bold text-sm">Please upload your current resume in PDF format.</p>
+                            </div>
+                            
+                            <input type="file" id="resumeFile" name="resume" accept=".pdf" class="hidden" required>
+                        </div>
+
+                        <!-- Active File Mount -->
+                        <div id="fileInfo" class="hidden mt-4 p-4 rounded-[20px] bg-emerald-500/10 border border-emerald-500/30 shadow-sm flex justify-between items-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                            <div class="flex items-center gap-4 pl-2">
+                                <div class="w-10 h-10 rounded-xl bg-surface flex items-center justify-center text-emerald-400 shadow-sm text-lg border border-white/[0.08]">
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                                </div>
+                                <div>
+                                    <p id="fileName" class="font-bold text-foreground text-sm line-clamp-1"></p>
+                                    <p id="fileSize" class="text-[10px] font-bold uppercase tracking-widest text-emerald-400/70"></p>
+                                </div>
+                            </div>
+                            <button type="button" class="w-8 h-8 rounded-full bg-surface hover:bg-rose-500/20 border border-white/[0.08] hover:border-rose-500/30 hover:text-rose-400 flex items-center justify-center text-foreground-subtle transition-colors shadow-sm" onclick="clearFile(event)" title="Remove">
+                                <i class="bi bi-x-lg text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Cover Letter / Notes (Optional)</label>
+                        <textarea name="notes" rows="4" placeholder="Share additional context about your application..." class="modern-input shadow-inner w-full text-sm resize-y font-mono bg-white/[0.02] border border-white/[0.08] focus:bg-white/[0.04] p-4 rounded-xl text-foreground placeholder:-text-foreground-subtle"></textarea>
+                    </div>
+
+                    <div class="mb-8 p-4 bg-white/[0.02] border border-white/[0.08] rounded-2xl flex items-start gap-4 cursor-pointer hover:bg-surface transition-colors" onclick="document.getElementById('terms').click()">
+                        <div class="relative mt-0.5 shrink-0">
+                            <input type="checkbox" id="terms" class="peer sr-only" required>
+                            <div class="w-6 h-6 border-2 border-slate-300 rounded peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center">
+                                <i class="bi bi-check-lg text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs font-bold text-foreground-muted leading-relaxed pt-0.5">I verify that the provided information is accurate and authorize the processing of my application.</p>
+                    </div>
+
+                    <button type="submit" id="submitBtn" disabled class="modern-btn modern-btn-success w-full py-4 text-lg font-black disabled:opacity-50 disabled:cursor-not-allowed disabled:-translate-y-0 disabled:shadow-none transition-all shadow-emerald-500/30">
+                        <i class="bi bi-rocket-takeoff-fill mr-2"></i> Submit Application
+                    </button>
+                </form>
+
+            </div>
+
+            <!-- Pipeline Status widget -->
+            <div class="modern-card p-6 bg-surface border border-white/[0.08] sticky top-8">
+                <h5 class="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-white/[0.08] pb-4 text-foreground-muted">
+                    <i class="bi bi-info-circle text-accent text-lg"></i> Application Process
+                </h5>
+
+                <div class="relative">
+                    <div class="absolute left-[19px] top-6 bottom-6 w-0.5 bg-white/[0.08]"></div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4 relative">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 border-4 border-background-base flex items-center justify-center shadow-sm shrink-0 relative z-10">
+                                <i class="bi bi-1-circle-fill"></i>
+                            </div>
+                            <div class="pt-2">
+                                <h6 class="font-bold text-sm text-foreground">Upload Resume</h6>
+                                <p class="text-xs font-medium text-foreground-subtle leading-relaxed mt-1">Upload and securely attach your PDF resume.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start gap-4 relative">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 border-4 border-background-base flex items-center justify-center shadow-sm shrink-0 relative z-10">
+                                <i class="bi bi-2-circle-fill"></i>
+                            </div>
+                            <div class="pt-2">
+                                <h6 class="font-bold text-sm text-foreground">AI Processing</h6>
+                                <p class="text-xs font-medium text-foreground-subtle leading-relaxed mt-1">Our system quickly analyzes your skills to match job requirements.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 relative">
+                            <div class="w-10 h-10 rounded-full bg-accent/20 border border-accent/20 text-accent border-4 border-background-base flex items-center justify-center shadow-sm shrink-0 relative z-10">
+                                <i class="bi bi-3-circle-fill"></i>
+                            </div>
+                            <div class="pt-2">
+                                <h6 class="font-bold text-sm text-foreground">Submission</h6>
+                                <p class="text-xs font-medium text-foreground-subtle leading-relaxed mt-1">Your profile is forwarded directly to the hiring team.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('resumeFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const submitBtn = document.getElementById('submitBtn');
+        const termsCheck = document.getElementById('terms');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+            dropArea.addEventListener(e, preventDefaults, false);
+        });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(e => dropArea.addEventListener(e, () => dropArea.querySelector('.border-dashed').classList.add('bg-emerald-500/10/50', 'border-emerald-400'), false));
+        ['dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, () => dropArea.querySelector('.border-dashed').classList.remove('bg-emerald-500/10/50', 'border-emerald-400'), false));
+
+        dropArea.addEventListener('drop', e => {
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        }, false);
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length) handleFileSelect(this.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (file.type !== 'application/pdf') {
+                alert('Error: Only PDF files are accepted.'); clearFile(); return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Error: Maximum file size is 5MB.'); clearFile(); return;
+            }
+
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.remove('hidden');
+            
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+
+            toggleSubmitState();
+        }
+
+        function clearFile(e) {
+            if(e) { e.preventDefault(); e.stopPropagation(); }
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            toggleSubmitState();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, dm)).toFixed(2)) + ' ' + ['B', 'KB', 'MB', 'GB'][dm];
+        }
+
+        function toggleSubmitState() {
+            submitBtn.disabled = !(fileInput.files.length && termsCheck.checked);
+        }
+
+        termsCheck.addEventListener('change', toggleSubmitState);
+        
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault(); alert('Error: Please upload your resume.');
+            } else {
+                // UI feedback
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-2"></i> Submitting...';
+                document.body.classList.add('cursor-wait');
+                dropArea.classList.add('opacity-50', 'pointer-events-none');
+            }
+        });
+    </script>
+</body>
+</html>

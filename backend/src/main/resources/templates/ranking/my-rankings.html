@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Rankings - Candidate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .ranking-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6c5ce7;
+            margin-bottom: 15px;
+        }
+        .ranking-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .rank-badge {
+            font-size: 1.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+        }
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .score-excellent {
+            border-left-color: #20bf6b;
+        }
+        .score-good {
+            border-left-color: #fd9644;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-trophy"></i> My Rankings</h2>
+        <a href="/jobs/browse" class="btn btn-primary">
+            <i class="bi bi-search"></i> Browse Jobs
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Rankings List -->
+    <div th:if="${rankings.isEmpty()}" class="empty-state">
+        <i class="bi bi-trophy display-1 text-muted mb-4"></i>
+        <h4>No Rankings Yet</h4>
+        <p class="text-muted mb-4">Apply to jobs and get ranked based on your skills and experience.</p>
+        <a href="/jobs/browse" class="btn btn-primary">
+            <i class="bi bi-search"></i> Browse Jobs
+        </a>
+    </div>
+
+    <div th:unless="${rankings.isEmpty()}" class="row">
+        <!-- Statistics Summary -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 th:text="${rankings.size()}"></h3>
+                            <p class="text-muted">Total Rankings</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 th:text="${#aggregates.sum(rankings.![rankingScore]) / rankings.size()}"></h3>
+                            <p class="text-muted">Average Score</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 th:text="${#aggregates.min(rankings.![rankingScore])}"></h3>
+                            <p class="text-muted">Best Score</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 th:text="${#aggregates.max(rankings.![rankingScore])}"></h3>
+                            <p class="text-muted">Highest Rank</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rankings List -->
+        <div class="col-md-12">
+            <div th:each="ranking : ${rankings}" class="card ranking-card"
+                 th:classappend="${ranking.rankingScore >= 80} ? 'score-excellent' :
+                                (${ranking.rankingScore >= 60} ? 'score-good' : '')">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <div class="rank-badge">
+                                <span th:text="${ranking.rankPosition}">#</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>
+                                <a th:href="@{/jobs/view/{id}(id=${ranking.job.id})}"
+                                   class="text-decoration-none" th:text="${ranking.job.title}">
+                                    Software Engineer
+                                </a>
+                            </h5>
+                            <p class="mb-2">
+                                <span class="badge bg-secondary" th:text="${ranking.job.department}">Engineering</span>
+                                <span class="badge bg-secondary" th:text="${ranking.job.location}">New York</span>
+                                <span class="badge bg-secondary" th:text="${ranking.job.jobType.displayName}">Full Time</span>
+                            </p>
+                            <p class="mb-1">
+                                <strong>Ranking Score:</strong>
+                                <span class="badge" th:classappend="${ranking.rankingScore >= 80} ? 'bg-success' :
+                                                                   (${ranking.rankingScore >= 60} ? 'bg-warning' : 'bg-danger')"
+                                      th:text="${#numbers.formatDecimal(ranking.rankingScore, 1, 1)} + '%'">
+                                </span>
+                                <span class="text-muted ms-2" th:text="'(' + ${#numbers.formatDecimal(ranking.percentile, 1, 1)} + 'th percentile)'"></span>
+                            </p>
+                            <p class="mb-0">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i>
+                                    Ranked on: <span th:text="${#temporals.format(ranking.rankingDate, 'dd MMM yyyy')}"></span>
+                                </small>
+                            </p>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Skills Match</small>
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="'width: ' + ${ranking.weightedSkillsScore} + '%;'"></div>
+                                    </div>
+                                    <small th:text="${#numbers.formatDecimal(ranking.weightedSkillsScore, 1, 1)} + ' / ' + ${ranking.skillsWeight}"></small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Experience</small>
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                             th:style="'width: ' + ${ranking.weightedExperienceScore} + '%;'"></div>
+                                    </div>
+                                    <small th:text="${#numbers.formatDecimal(ranking.weightedExperienceScore, 1, 1)} + ' / ' + ${ranking.experienceWeight}"></small>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <small class="text-muted">Education</small>
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             th:style="'width: ' + ${ranking.weightedEducationScore} + '%;'"></div>
+                                    </div>
+                                    <small th:text="${#numbers.formatDecimal(ranking.weightedEducationScore, 1, 1)} + ' / ' + ${ranking.educationWeight}"></small>
+                                </div>
+                                <div class="col-6 mt-2 text-end">
+                                    <span class="badge" th:classappend="${ranking.getHiringStatusBadgeClass()}"
+                                          th:text="${ranking.hiringStatus != null ? ranking.hiringStatus.displayName : 'Under Review'}">
+                                    </span>
+                                    <a th:href="@{/ranking/details/{id}(id=${ranking.id})}"
+                                       class="btn btn-sm btn-outline-primary d-block mt-2">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Card -->
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> About Rankings</h5>
+        </div>
+        <div class="card-body">
+            <p>Rankings are calculated based on:</p>
+            <ul>
+                <li><strong>Skills Match:</strong> How well your skills match the job requirements</li>
+                <li><strong>Experience Match:</strong> Your years of experience compared to requirements</li>
+                <li><strong>Education Match:</strong> Your education level compared to requirements</li>
+                <li><strong>Percentile:</strong> Your position relative to other applicants</li>
+            </ul>
+            <p class="mb-0">Higher scores mean better match with the job!</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+# =============================================
+# ROOT .gitignore  –  AI Recruitment Platform
+# =============================================
+
+# ── IDE / Editor ──────────────────────────────
+.idea/
+.vscode/
+*.iws
+*.iml
+*.ipr
+
+# ── OS ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Secrets & environment ─────────────────────
+# NEVER commit real credentials
+.env
+*.env
+!.env.example
+
+# ──────────────────────────────────────────────
+# BACKEND (Spring Boot / Maven)
+# ──────────────────────────────────────────────
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/logs/
+backend/uploads/
+backend/*.log
+backend/HELP.md
+
+# Spring Boot dev tools restart file
+backend/.restarttrigger
+
+# ──────────────────────────────────────────────
+# AI / PYTHON (cv_model)
+# ──────────────────────────────────────────────
+
+# Virtual environments
+cv_model/.venv/
+cv_model/venv/
+cv_model/env/
+
+# Byte-compiled / cached files
+cv_model/__pycache__/
+cv_model/*.py[cod]
+cv_model/*$py.class
+**/__pycache__/
+**/*.pyc
+
+# Trained model artefacts  (large binary files)
+# Commit only if using Git LFS  →  see .gitattributes
+cv_model/*.pkl
+
+# Temporary / debug scripts
+cv_model/output.txt
+cv_model/check_issue.py
+cv_model/debug_eval.py
+cv_model/test_*.py
+cv_model/evaluate_*.py
+
+# Data directories (usually large / raw)
+cv_model/data/
+cv_model/hotel_synth_dataset/
+
+# SQLite or other local DB files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter
+.ipynb_checkpoints/

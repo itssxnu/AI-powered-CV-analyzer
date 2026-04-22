@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Recalculate Rankings - ' + ${job.title}">Recalculate Rankings</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <style>
+        /* Custom Modern Slider Range Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            animate: 0.2s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            background: #e2e8f0;
+            border-radius: 9999px;
+            border: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #6366f1; /* Indigo-500 default */
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Apply dynamic colors to thumbs based on data-color attribute or ID */
+        #skillsWeight::-webkit-slider-thumb { background: #10b981; } /* Emerald */
+        #experienceWeight::-webkit-slider-thumb { background: #f59e0b; } /* Amber */
+        #educationWeight::-webkit-slider-thumb { background: #0ea5e9; } /* Sky */
+        #personalityWeight::-webkit-slider-thumb { background: #8b5cf6; } /* Purple */
+        #culturalWeight::-webkit-slider-thumb { background: #f43f5e; } /* Rose */
+    </style>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <a th:href="@{/ranking/job/{id}(id=${job.id})}" class="mt-1 w-12 h-12 rounded-full bg-white text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-arrow-repeat text-amber-400"></i> Mutate Matrix
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Vector Analysis Recalculation: <span class="text-amber-400" th:text="${job.title}">Job</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Configurator -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Current Conf -->
+                <div class="modern-card p-6 bg-slate-900 border-0 text-white relative overflow-hidden">
+                    <i class="bi bi-hdd-network absolute -right-4 -bottom-4 text-6xl text-foreground-muted opacity-30"></i>
+                    <h5 class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="bi bi-record-circle text-rose-400 animate-pulse"></i> Currently Active Weights</h5>
+                    <div class="flex flex-wrap gap-2 relative z-10">
+                        <span class="bg-slate-800 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded shadow-sm text-xs font-bold uppercase tracking-widest">SKL: <span th:text="${currentWeights.skillsWeight} + '%'"></span></span>
+                        <span class="bg-slate-800 text-amber-400 border border-amber-500/30 px-3 py-1 rounded shadow-sm text-xs font-bold uppercase tracking-widest">EXP: <span th:text="${currentWeights.experienceWeight} + '%'"></span></span>
+                        <span class="bg-slate-800 text-sky-400 border border-sky-500/30 px-3 py-1 rounded shadow-sm text-xs font-bold uppercase tracking-widest">EDU: <span th:text="${currentWeights.educationWeight} + '%'"></span></span>
+                        <span th:if="${currentWeights.personalityWeight > 0}" class="bg-slate-800 text-purple-400 border border-purple-500/30 px-3 py-1 rounded shadow-sm text-xs font-bold uppercase tracking-widest">PER: <span th:text="${currentWeights.personalityWeight} + '%'"></span></span>
+                        <span th:if="${currentWeights.culturalFitWeight > 0}" class="bg-slate-800 text-rose-400 border border-rose-500/30 px-3 py-1 rounded shadow-sm text-xs font-bold uppercase tracking-widest">CUL: <span th:text="${currentWeights.culturalFitWeight} + '%'"></span></span>
+                    </div>
+                </div>
+
+                <!-- Main Form -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-white shadow-lg overflow-hidden relative">
+                    <!-- Progress bar on top to show total weight -->
+                    <div class="h-1.5 w-full bg-surface">
+                        <div id="totalWeightProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+
+                    <div class="p-6 sm:p-8">
+                        <form th:action="@{/ranking/job/{id}/recalculate(id=${job.id})}" method="post" id="weightForm" class="space-y-8">
+
+                            <!-- Skills -->
+                            <div class="space-y-3 p-4 bg-emerald-500/10/30 rounded-2xl border border-emerald-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-braces bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-1.5 rounded-lg"></i> Technical Skills Yield
+                                    </label>
+                                    <span class="text-xl font-black text-emerald-400" id="skillsValue" th:text="${currentWeights.skillsWeight} + '%'">50%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="skillsWeight" name="skillsWeight" min="0" max="100" step="5" th:value="${currentWeights.skillsWeight}" oninput="updateWeight('skills', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="space-y-3 p-4 bg-amber-500/10/30 rounded-2xl border border-amber-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-briefcase bg-amber-500/20 border border-amber-500/30 text-amber-400 p-1.5 rounded-lg"></i> Experience Vectors Yield
+                                    </label>
+                                    <span class="text-xl font-black text-amber-400" id="experienceValue" th:text="${currentWeights.experienceWeight} + '%'">30%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="experienceWeight" name="experienceWeight" min="0" max="100" step="5" th:value="${currentWeights.experienceWeight}" oninput="updateWeight('experience', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="space-y-3 p-4 bg-sky-50/30 rounded-2xl border border-sky-100/50">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-sm font-black tracking-widest uppercase text-foreground-muted flex items-center gap-2">
+                                        <i class="bi bi-mortarboard-fill bg-sky-100 text-sky-600 p-1.5 rounded-lg"></i> Foundation Base Yield
+                                    </label>
+                                    <span class="text-xl font-black text-sky-600" id="educationValue" th:text="${currentWeights.educationWeight} + '%'">20%</span>
+                                </div>
+                                <div class="px-2">
+                                    <input type="range" id="educationWeight" name="educationWeight" min="0" max="100" step="5" th:value="${currentWeights.educationWeight}" oninput="updateWeight('education', this.value)">
+                                </div>
+                                <div class="flex justify-between px-2 text-[10px] font-bold text-foreground-subtle">
+                                    <span>0%</span><span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Soft Skill Toggles area -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/[0.04]">
+                                <!-- Personality -->
+                                <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-4 transition-colors focus-within:border-purple-300">
+                                    <div class="flex items-center mb-4">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="includePersonality" th:checked="${currentWeights.personalityWeight > 0}" onchange="togglePersonality()" class="w-4 h-4 text-accent bg-white border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        </div>
+                                        <div class="ml-3 text-sm flex-1">
+                                            <label for="includePersonality" class="font-black uppercase tracking-widest text-foreground-muted cursor-pointer flex items-center gap-2">
+                                                <i class="bi bi-emoji-smile text-purple-500"></i> Trait Scan Matrix
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="personalitySection" th:class="${currentWeights.personalityWeight > 0 ? 'space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50' : 'hidden space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50'}">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-foreground-subtle uppercase tracking-widest">Weighting</span>
+                                            <span class="text-lg font-black text-purple-600" id="personalityValue" th:text="${currentWeights.personalityWeight} + '%'">0%</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <input type="range" id="personalityWeight" name="personalityWeight" min="0" max="100" step="5" th:value="${currentWeights.personalityWeight}" oninput="updateWeight('personality', this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cultural -->
+                                <div class="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-4 transition-colors focus-within:border-rose-300">
+                                    <div class="flex items-center mb-4">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="includeCultural" th:checked="${currentWeights.culturalFitWeight > 0}" onchange="toggleCultural()" class="w-4 h-4 text-accent bg-white border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        </div>
+                                        <div class="ml-3 text-sm flex-1">
+                                            <label for="includeCultural" class="font-black uppercase tracking-widest text-foreground-muted cursor-pointer flex items-center gap-2">
+                                                <i class="bi bi-people-fill text-rose-400"></i> Cultural Resonance
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div id="culturalSection" th:class="${currentWeights.culturalFitWeight > 0 ? 'space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50' : 'hidden space-y-3 mt-4 pt-4 border-t border-white/[0.08]/50'}">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-foreground-subtle uppercase tracking-widest">Weighting</span>
+                                            <span class="text-lg font-black text-rose-400" id="culturalValue" th:text="${currentWeights.culturalFitWeight} + '%'">0%</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <input type="range" id="culturalWeight" name="culturalFitWeight" min="0" max="100" step="5" th:value="${currentWeights.culturalFitWeight}" oninput="updateWeight('cultural', this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional Meta inputs -->
+                            <div class="space-y-4 pt-6 border-t border-white/[0.04]">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Matrix Memory Alias (Optional)</label>
+                                    <input type="text" name="configName" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-colors shadow-sm" placeholder="e.g. Iteration 2 Priority Tech">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Meta Analysis Notes (Optional)</label>
+                                    <textarea name="description" rows="2" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-colors shadow-sm" placeholder="Documentation..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Total Summary Sticky Footer equivalent -->
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl border border-amber-200 shadow-sm relative overflow-hidden bg-amber-500/10" id="totalWeightContainer" style="box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06);">
+                                <div class="relative z-10 flex flex-col items-center sm:items-start text-amber-400" id="totalWeightStatus">
+                                    <span class="font-black text-2xl flex items-center gap-2"><i class="bi bi-diagram-3-fill"></i> TOTAL: <span id="totalWeightDisplay">100</span>%</span>
+                                    <span class="text-xs font-bold uppercase tracking-widest opacity-80" id="totalWeightMessage">Parameters Valid</span>
+                                </div>
+                                <button type="submit" id="recalculateBtn" class="w-full sm:w-auto modern-btn bg-amber-500 text-white shadow-amber-500/30 hover:bg-amber-400 hover:-translate-y-1 relative z-10 font-black">
+                                    <i class="bi bi-arrow-repeat mr-2"></i> Recalculate Run
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Implications -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <div class="modern-card border-0 bg-white relative overflow-hidden h-full shadow-lg">
+                    <div class="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-400 to-rose-400"></div>
+                    <div class="p-6">
+                        <h5 class="text-sm font-black uppercase tracking-widest text-foreground mb-6 flex items-center gap-2 border-b border-white/[0.04] pb-4">
+                            <i class="bi bi-exclamation-triangle-fill text-amber-400"></i> Post-Execution Vectors
+                        </h5>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400">
+                                    <i class="bi bi-arrow-up-right font-black"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-foreground-muted text-xs mb-1 uppercase tracking-wider">Score Mutation</h6>
+                                    <p class="text-[10px] text-foreground-subtle">Entities will receive updated cumulative matrices.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-accent/20 border border-accent/20 flex items-center justify-center shrink-0 text-accent">
+                                    <i class="bi bi-sort-down font-black"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-foreground-muted text-xs mb-1 uppercase tracking-wider">Array Sorting Shift</h6>
+                                    <p class="text-[10px] text-foreground-subtle">Node positions may invert based on re-weighted priority logic.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center shrink-0 text-sky-600">
+                                    <i class="bi bi-clock-history font-black"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-foreground-muted text-xs mb-1 uppercase tracking-wider">State Preservation</h6>
+                                    <p class="text-[10px] text-foreground-subtle">Prior iterations safely preserved within entity vector history data.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400">
+                                    <i class="bi bi-star-fill font-black"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-foreground-muted text-xs mb-1 uppercase tracking-wider">Flag Isolation</h6>
+                                    <p class="text-[10px] text-foreground-subtle">Boolean fields (targets, phases) remain unaffected.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let skills = [[${currentWeights.skillsWeight}]];
+        let experience = [[${currentWeights.experienceWeight}]];
+        let education = [[${currentWeights.educationWeight}]];
+        let personality = [[${currentWeights.personalityWeight}]];
+        let cultural = [[${currentWeights.culturalFitWeight}]];
+
+        function updateWeight(type, value) {
+            switch(type) {
+                case 'skills':
+                    skills = parseInt(value);
+                    document.getElementById('skillsValue').textContent = value + '%';
+                    break;
+                case 'experience':
+                    experience = parseInt(value);
+                    document.getElementById('experienceValue').textContent = value + '%';
+                    break;
+                case 'education':
+                    education = parseInt(value);
+                    document.getElementById('educationValue').textContent = value + '%';
+                    break;
+                case 'personality':
+                    personality = parseInt(value);
+                    document.getElementById('personalityValue').textContent = value + '%';
+                    break;
+                case 'cultural':
+                    cultural = parseInt(value);
+                    document.getElementById('culturalValue').textContent = value + '%';
+                    break;
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const total = skills + experience + education + personality + cultural;
+            const totalElementDisplay = document.getElementById('totalWeightDisplay');
+            const totalElementContainer = document.getElementById('totalWeightContainer');
+            const totalElementStatus = document.getElementById('totalWeightStatus');
+            const totalElementMessage = document.getElementById('totalWeightMessage');
+            const recalculateBtn = document.getElementById('recalculateBtn');
+            const progressBar = document.getElementById('totalWeightProgressBar');
+
+            totalElementDisplay.textContent = total;
+            progressBar.style.width = Math.min(100, total) + '%';
+
+            if (total === 100) {
+                // Valid State: Emerald for valid, amber container base
+                totalElementContainer.style.backgroundColor = '#ecfdf5'; // emerald-50 base override for valid!
+                totalElementContainer.style.borderColor = '#a7f3d0';
+                
+                totalElementStatus.className = 'relative z-10 flex flex-col items-center sm:items-start text-emerald-400';
+                totalElementMessage.textContent = 'Parameters Valid';
+                
+                progressBar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                recalculateBtn.disabled = false;
+                recalculateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                // Invalid State: Rose
+                totalElementContainer.style.backgroundColor = '#fff1f2';
+                totalElementContainer.style.borderColor = '#fecdd3';
+                
+                totalElementStatus.className = 'relative z-10 flex flex-col items-center sm:items-start text-rose-400';
+                
+                if (total > 100) {
+                    totalElementMessage.textContent = 'Oversaturated Input';
+                    progressBar.className = 'h-full bg-rose-500 transition-all duration-300';
+                } else {
+                    totalElementMessage.textContent = 'Undersaturated Input';
+                    progressBar.className = 'h-full bg-amber-500 transition-all duration-300';
+                }
+
+                recalculateBtn.disabled = true;
+                recalculateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function togglePersonality() {
+            const section = document.getElementById('personalitySection');
+            const checkbox = document.getElementById('includePersonality');
+
+            if (checkbox.checked) {
+                section.classList.remove('hidden');
+                personality = 10;
+                document.getElementById('personalityWeight').value = 10;
+                document.getElementById('personalityValue').textContent = '10%';
+
+                // Adjust other weights proportionally
+                const totalWithoutPersonality = skills + experience + education;
+                if(totalWithoutPersonality > 0) {
+                    const factor = (totalWithoutPersonality - 10) / totalWithoutPersonality;
+                    skills = Math.round(skills * factor);
+                    experience = Math.round(experience * factor);
+                    education = 100 - skills - experience - 10;
+                } else {
+                    skills = 0; experience = 0; education = Math.max(0, 90 - cultural);
+                }
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            } else {
+                section.classList.add('hidden');
+                personality = 0;
+                document.getElementById('personalityWeight').value = 0;
+                document.getElementById('personalityValue').textContent = '0%';
+
+                // Rescale
+                const target = 100 - cultural;
+                const currentTotal = skills + experience + education;
+                if(currentTotal > 0) {
+                   const factor = target / currentTotal;
+                   skills = Math.round(skills * factor);
+                   experience = Math.round(experience * factor);
+                   education = target - skills - experience;
+                } else {
+                   skills = 50; experience = 30; education = target - 80;
+                }
+                
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+            }
+            calculateTotal();
+        }
+
+        function toggleCultural() {
+            const section = document.getElementById('culturalSection');
+            const checkbox = document.getElementById('includeCultural');
+
+            if (checkbox.checked) {
+                section.classList.remove('hidden');
+                cultural = 10;
+                document.getElementById('culturalWeight').value = 10;
+                document.getElementById('culturalValue').textContent = '10%';
+
+                const totalWithoutCultural = skills + experience + education + personality;
+                if(totalWithoutCultural > 0) {
+                    const factor = (totalWithoutCultural - 10) / totalWithoutCultural;
+                    skills = Math.round(skills * factor);
+                    experience = Math.round(experience * factor);
+                    education = Math.round(education * factor);
+                    personality = 90 - skills - experience - education;
+                }
+
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+                document.getElementById('personalityWeight').value = personality;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+                document.getElementById('personalityValue').textContent = personality + '%';
+            } else {
+                section.classList.add('hidden');
+                cultural = 0;
+                document.getElementById('culturalWeight').value = 0;
+                document.getElementById('culturalValue').textContent = '0%';
+
+                const target = 100;
+                const currentTotal = skills + experience + education + personality;
+                if(currentTotal > 0) {
+                   const factor = target / currentTotal;
+                   skills = Math.round(skills * factor);
+                   experience = Math.round(experience * factor);
+                   personality = Math.round(personality * factor);
+                   education = target - skills - experience - personality;
+                }
+                
+                document.getElementById('skillsWeight').value = skills;
+                document.getElementById('experienceWeight').value = experience;
+                document.getElementById('educationWeight').value = education;
+                document.getElementById('personalityWeight').value = personality;
+
+                document.getElementById('skillsValue').textContent = skills + '%';
+                document.getElementById('experienceValue').textContent = experience + '%';
+                document.getElementById('educationValue').textContent = education + '%';
+                document.getElementById('personalityValue').textContent = personality + '%';
+            }
+            calculateTotal();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotal();
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

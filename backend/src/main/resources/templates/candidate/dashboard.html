@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard - AI Recruitment System</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <!-- Ambient Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-clay-accent to-indigo-600 rounded-[32px] p-8 sm:p-12 text-white shadow-modern-card relative overflow-hidden group">
+            <i class="bi bi-robot text-8xl absolute -right-6 -top-6 opacity-20 group-hover:scale-110 transition-transform duration-700"></i>
+            <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight mb-2 relative z-10">
+                Welcome, <span th:text="${user != null ? user.firstName : 'Candidate'}"></span>!
+            </h1>
+            <p class="text-white/80 font-bold tracking-wide relative z-10">Your AI-powered recruitment engine is standing by.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Main Content (Left Col) -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Profile Data Bento Block -->
+                <div class="modern-card p-6 sm:p-8">
+                    <h5 class="text-xl font-extrabold flex items-center gap-3 mb-6 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-person-badge-fill text-accent-alt"></i> Personal Details
+                    </h5>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Identity -->
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Full Name</p>
+                                <p class="font-bold font-heading text-lg" th:text="${user != null ? user.firstName + ' ' + user.lastName : 'Not set'}"></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Email Address</p>
+                                <p class="font-bold text-sm" th:text="${user != null ? user.email : 'Not set'}"></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Primary Phone</p>
+                                <p class="font-bold text-sm" th:text="${user != null ? user.phone : 'Not set'}"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Career -->
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Experience Level</p>
+                                <p class="font-bold text-lg text-emerald-400" th:text="${user != null and user.experienceYears != null ? user.experienceYears + ' years' : 'Not specified'}"></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Academic Level</p>
+                                <p class="font-bold text-sm line-clamp-2" th:text="${user != null and user.education != null ? user.education : 'Not specified'}"></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Profile Status</p>
+                                <span th:if="${user != null and user.active}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest"><i class="bi bi-check-circle-fill"></i> Active</span>
+                                <span th:if="${user != null and !user.active}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-widest"><i class="bi bi-x-circle-fill"></i> Inactive</span>
+                                <span th:if="${user == null}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-widest"><i class="bi bi-exclamation-circle-fill"></i> Unknown</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Matrix -->
+                    <div class="mt-8 bg-surface p-6 rounded-[24px] shadow-sm">
+                        <h6 class="text-xs font-extrabold uppercase tracking-widest text-foreground-muted mb-4"><i class="bi bi-code-square text-accent mr-2"></i> Extracted Skills</h6>
+                        
+                        <div th:if="${user != null and user.skills != null}" class="flex flex-wrap gap-2">
+                            <span th:each="skill : ${#strings.listSplit(user.skills, ',')}" class="px-4 py-2 bg-surface rounded-xl text-sm font-bold shadow-sm border border-white/10 text-accent-bright hover:scale-105 transition-transform" th:text="${skill.trim()}"></span>
+                        </div>
+                        <div th:if="${user == null or user.skills == null}" class="text-foreground-subtle font-bold text-sm">
+                            <i class="bi bi-exclamation-triangle mr-2"></i> No skills found. Upload your Resume!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Status Telemetry -->
+                <div class="modern-card p-6 sm:p-8">
+                    <div class="flex items-center justify-between mb-8 border-b border-white/[0.08] pb-4">
+                        <h5 class="text-xl font-extrabold flex items-center gap-3">
+                            <i class="bi bi-cpu-fill text-amber-400"></i> AI Profile Scan
+                        </h5>
+                        <span th:if="${user.currentResume != null and user.currentResume.mlProcessed}" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2"><i class="bi bi-check-circle-fill"></i> Complete</span>
+                        <span th:if="${user.currentResume == null or !user.currentResume.mlProcessed}" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2"><i class="bi bi-clock-fill"></i> Pending</span>
+                    </div>
+
+                    <div th:if="${user.currentResume != null and user.currentResume.mlProcessed}" class="space-y-6">
+                        <p class="text-foreground-muted font-medium text-sm">Your profile has been successfully evaluated by our AI.</p>
+                        
+                        <div class="bg-white/[0.06] p-5 rounded-[20px] shadow-sm border border-white/[0.08]">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-black uppercase tracking-widest text-foreground-muted">Text Extraction Confidence</span>
+                                <span class="font-black text-accent" th:text="${#numbers.formatDecimal(user.currentResume.mlConfidence * 100, 1, 0)} + '%'"></span>
+                            </div>
+                            <div class="h-2 w-full bg-clay-muted/10 rounded-full overflow-hidden shadow-inset">
+                                <div class="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full transition-all duration-1000" th:style="'width: ' + ${user.currentResume.mlConfidence * 100} + '%;'"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${user.currentResume == null or !user.currentResume.mlProcessed}" class="text-center py-6">
+                        <i class="bi bi-cloud-arrow-up text-5xl text-foreground-muted/50 mb-4 block"></i>
+                        <p class="font-medium text-foreground-muted mb-6">Complete your profile and upload your Resume to trigger the AI analysis.</p>
+                        <a th:href="@{/candidate/resume/upload}" class="modern-btn modern-btn-success shadow-none">
+                            <i class="bi bi-upload mr-2"></i> Upload Resume 
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Widgets (Right Col) -->
+            <div class="space-y-8">
+                
+                <!-- AI Status Orb -->
+                <div class="modern-card flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-indigo-900/40 to-surface">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-400 to-clay-accent-alt shadow-clayDeep flex flex-col items-center justify-center text-white mb-6 border-4 border-white/10 transition-transform">
+                        <i class="bi bi-robot text-4xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black font-heading text-xl">AI Status</h4>
+                        <p th:if="${user.currentResume != null and user.currentResume.mlConfidence != null}" class="text-xs font-bold uppercase tracking-widest text-foreground-muted mt-1">
+                            Extraction: <span th:text="${#numbers.formatDecimal(user.currentResume.mlConfidence * 100, 1, 0)}"></span>%
+                        </p>
+                    </div>
+
+                    <div th:if="${user.currentResume != null and user.currentResume.mlProcessed}" class="mt-6 w-full py-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm">
+                        <i class="bi bi-check-circle-fill mr-1"></i> Data Synchronized
+                    </div>
+                    <div th:if="${user.currentResume == null or !user.currentResume.mlProcessed}" class="mt-6 w-full py-2 bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-xl text-xs font-bold uppercase tracking-widest shadow-sm">
+                        <i class="bi bi-clock-fill mr-1"></i> Sequence Pending
+                    </div>
+                </div>
+
+                <!-- Navigation Module -->
+                <div class="modern-card p-6">
+                    <h5 class="text-lg font-extrabold flex items-center gap-2 mb-6 border-b border-white/[0.08] pb-3">
+                        <i class="bi bi-lightning-charge-fill text-amber-400"></i> Quick Links
+                    </h5>
+                    
+                    <div class="flex flex-col gap-3">
+                        <a th:href="@{/candidate/profile}" class="modern-btn modern-btn-primary w-full justify-start py-3 px-4 text-sm bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent shadow-none hover:shadow-sm">
+                            <i class="bi bi-person-gear mr-3 text-lg"></i> Manage Settings
+                        </a>
+                        <a th:href="@{/candidate/resume}" class="modern-btn modern-btn-success w-full justify-start py-3 px-4 text-sm bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 shadow-none hover:shadow-sm">
+                            <i class="bi bi-file-earmark-bar-graph mr-3 text-lg"></i> Resume Hub
+                        </a>
+                        <a th:href="@{/}" class="modern-btn modern-btn-secondary w-full justify-start py-3 px-4 text-sm bg-white/[0.02] hover:bg-surface text-foreground-muted shadow-none hover:shadow-sm border-0">
+                            <i class="bi bi-search mr-3 text-lg"></i> Job Boards
+                        </a>
+                        <a th:href="@{/skill-match/my-results}" class="modern-btn modern-btn-primary w-full justify-start py-3 px-4 text-sm bg-gradient-to-r from-clay-accent to-pink-500 text-white shadow-sm border-0">
+                            <i class="bi bi-graph-up-arrow mr-3 text-lg"></i> AI Top Matches
+                        </a>
+                        <a th:href="@{/applications/my-interviews}" class="modern-btn modern-btn-primary w-full justify-start py-3 px-4 text-sm bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent-bright shadow-none hover:shadow-sm">
+                            <i class="bi bi-chat-square-quote mr-3 text-lg"></i> AI Interviews
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </main>
+
+</body>
+</html>
