@@ -46,9 +46,6 @@ Then open it and fill in **your** values:
 # Line 7 — your local MySQL password
 spring.datasource.password=YOUR_DB_PASSWORD_HERE
 
-# Line 56-57 — only needed if you test email features
-spring.mail.username=YOUR_EMAIL@gmail.com
-spring.mail.password=YOUR_GMAIL_APP_PASSWORD
 ```
 
 > **MySQL password** — whatever you set when installing MySQL on your machine.
