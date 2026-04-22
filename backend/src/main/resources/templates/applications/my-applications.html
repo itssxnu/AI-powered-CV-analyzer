@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[900px] rounded-[100%] blur-[160px] bg-indigo-600/10 top-[5%] left-[-5%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[700px] h-[700px] rounded-[100%] blur-[130px] bg-accent/8 bottom-[-10%] right-[5%] animate-blob-float-alt mix-blend-screen"></div>
+    </div>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h1 class="text-3xl font-black font-heading tracking-tight flex items-center gap-3">
+                    <i class="bi bi-send-fill text-accent-bright"></i> My Applications
+                </h1>
+                <p class="text-foreground-muted text-sm mt-1">Track your job applications and upcoming interviews</p>
+            </div>
+            <a href="/jobs/browse" class="modern-btn modern-btn-primary shadow-indigo-500/30 font-black">
+                <i class="bi bi-search mr-2"></i> Browse More Jobs
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${message}" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-4 rounded-xl flex items-center gap-3">
+            <i class="bi bi-check-circle-fill"></i><span th:text="${message}" class="font-bold"></span>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-6 py-4 rounded-xl flex items-center gap-3">
+            <i class="bi bi-exclamation-octagon-fill"></i><span th:text="${error}" class="font-bold"></span>
+        </div>
+
+        <!-- Stats Row -->
+        <div th:if="${!applications.isEmpty()}" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="modern-card p-5 border border-white/[0.08] bg-surface text-center">
+                <div class="text-3xl font-black text-foreground" th:text="${applications.size()}">0</div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-1">Total Applied</div>
+            </div>
+            <div class="modern-card p-5 border border-indigo-500/20 bg-surface text-center">
+                <div class="text-3xl font-black text-indigo-400" th:text="${#lists.size(applications.?[status.name() == 'INTERVIEW_SCHEDULED'])}">0</div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-1">Interviews</div>
+            </div>
+            <div class="modern-card p-5 border border-sky-500/20 bg-surface text-center">
+                <div class="text-3xl font-black text-sky-400" th:text="${#lists.size(applications.?[status.name() == 'SHORTLISTED'])}">0</div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-1">Shortlisted</div>
+            </div>
+            <div class="modern-card p-5 border border-amber-500/20 bg-surface text-center">
+                <div class="text-3xl font-black text-amber-400" th:text="${#lists.size(applications.?[status.name() == 'PENDING'])}">0</div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mt-1">Awaiting Review</div>
+            </div>
+        </div>
+
+        <!-- Upcoming Interviews Banner - shown only when there are scheduled ones -->
+        <div th:if="${!#lists.isEmpty(applications.?[interviewScheduled == true])}">
+            <h2 class="text-sm font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2 mb-4">
+                <i class="bi bi-calendar-event-fill"></i> Upcoming Interviews
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div th:each="app : ${applications.?[interviewScheduled == true]}"
+                     class="modern-card p-0 border border-indigo-500/30 bg-surface overflow-hidden relative">
+                    <!-- Accent stripe -->
+                    <div class="h-1 w-full bg-gradient-to-r from-indigo-500 to-accent"></div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Interview Confirmed</div>
+                                <h3 class="text-lg font-black text-foreground" th:text="${app.job.title}">Job Title</h3>
+                                <p class="text-foreground-subtle text-sm" th:text="${app.job.department}">Department</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-black uppercase tracking-widest">Scheduled</span>
+                        </div>
+
+                        <!-- Interview Details -->
+                        <div class="bg-background-base rounded-xl p-4 space-y-3 border border-white/[0.04] mb-4">
+                            <div class="flex items-center gap-3 text-sm">
+                                <i class="bi bi-calendar3 text-indigo-400 w-5 text-center"></i>
+                                <div>
+                                    <div class="text-[10px] uppercase tracking-widest text-foreground-subtle">Date &amp; Time</div>
+                                    <div class="font-black text-foreground" th:text="${#temporals.format(app.interviewDate, 'EEEE, dd MMMM yyyy \u2014 HH:mm')}">Mon, 01 Apr 2026 — 10:00</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm">
+                                <i class="bi bi-display text-sky-400 w-5 text-center" th:if="${app.interviewType == 'ONLINE'}"></i>
+                                <i class="bi bi-telephone text-amber-400 w-5 text-center" th:if="${app.interviewType == 'PHONE'}"></i>
+                                <i class="bi bi-building text-emerald-400 w-5 text-center" th:if="${app.interviewType == 'IN_PERSON'}"></i>
+                                <div>
+                                    <div class="text-[10px] uppercase tracking-widest text-foreground-subtle">Format</div>
+                                    <div class="font-black text-foreground" th:text="${app.interviewType != null ? app.interviewType.replace('_', ' ') : 'To be confirmed'}">ONLINE</div>
+                                </div>
+                            </div>
+                            <div th:if="${app.interviewLink}" class="flex items-center gap-3 text-sm">
+                                <i class="bi bi-link-45deg text-accent-bright w-5 text-center"></i>
+                                <div>
+                                    <div class="text-[10px] uppercase tracking-widest text-foreground-subtle">Meeting Link</div>
+                                    <a th:href="${app.interviewLink}" target="_blank"
+                                       class="font-bold text-accent-bright hover:underline">Join Meeting</a>
+                                </div>
+                            </div>
+                            <div th:if="${app.interviewLocation}" class="flex items-center gap-3 text-sm">
+                                <i class="bi bi-geo-alt-fill text-emerald-400 w-5 text-center"></i>
+                                <div>
+                                    <div class="text-[10px] uppercase tracking-widest text-foreground-subtle">Location</div>
+                                    <div class="font-black text-foreground" th:text="${app.interviewLocation}"></div>
+                                </div>
+                            </div>
+                            <div th:if="${app.interviewerName}" class="flex items-center gap-3 text-sm">
+                                <i class="bi bi-person-badge-fill text-rose-400 w-5 text-center"></i>
+                                <div>
+                                    <div class="text-[10px] uppercase tracking-widest text-foreground-subtle">Interviewer</div>
+                                    <div class="font-black text-foreground" th:text="${app.interviewerName}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a th:href="@{/applications/{id}(id=${app.id})}"
+                           class="modern-btn modern-btn-secondary border-indigo-500/30 text-indigo-300 w-full text-center font-black text-xs">
+                            <i class="bi bi-eye mr-2"></i> View Full Application
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Applications List -->
+        <div>
+            <h2 class="text-sm font-black uppercase tracking-widest text-foreground-subtle flex items-center gap-2 mb-4">
+                <i class="bi bi-list-ul"></i> All Applications
+            </h2>
+
+            <!-- Empty State -->
+            <div th:if="${applications.isEmpty()}" class="modern-card p-16 border border-white/[0.08] bg-surface text-center">
+                <i class="bi bi-send text-foreground-subtle/30 text-7xl block mb-4"></i>
+                <h4 class="text-xl font-black text-foreground mb-2">No Applications Yet</h4>
+                <p class="text-foreground-subtle mb-6">You haven't applied for any jobs. Start your journey now!</p>
+                <a href="/jobs/browse" class="modern-btn modern-btn-primary px-10">Browse Jobs</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div th:each="app : ${applications}"
+                     class="modern-card p-0 border bg-surface overflow-hidden group hover:-translate-y-0.5 transition-transform duration-200"
+                     th:classappend="${app.interviewScheduled} ? 'border-indigo-500/20' : 'border-white/[0.08]'">
+
+                    <!-- Status indicator stripe -->
+                    <div class="h-0.5 w-full"
+                         th:classappend="${app.status?.name() == 'PENDING'} ? 'bg-amber-500/60' :
+                                        (${app.status?.name() == 'SHORTLISTED'} ? 'bg-sky-500/60' :
+                                        (${app.status?.name() == 'INTERVIEW_SCHEDULED'} ? 'bg-indigo-500/60' :
+                                        (${app.status?.name() == 'HIRED'} ? 'bg-emerald-500/60' :
+                                        (${app.status?.name() == 'REJECTED'} ? 'bg-rose-500/60' : 'bg-white/10'))))">
+                    </div>
+
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1 min-w-0">
+                                <a th:href="@{/jobs/view/{id}(id=${app.job.id})}"
+                                   class="font-black text-foreground hover:text-accent-bright transition-colors truncate block"
+                                   th:text="${app.job.title}">Job Title</a>
+                                <p class="text-foreground-subtle text-xs mt-0.5 flex items-center gap-1">
+                                    <i class="bi bi-building"></i>
+                                    <span th:text="${app.job.department}"></span>
+                                    <span class="mx-1 opacity-30">·</span>
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span th:text="${app.job.location}"></span>
+                                </p>
+                            </div>
+                            <span class="ml-2 shrink-0 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
+                                  th:classappend="${app.status?.name() == 'PENDING'} ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                                 (${app.status?.name() == 'SHORTLISTED'} ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
+                                                 (${app.status?.name() == 'INTERVIEW_SCHEDULED'} ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                                                 (${app.status?.name() == 'HIRED'} ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                 (${app.status?.name() == 'REJECTED'} ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-surface text-foreground-muted border-white/[0.08]'))))"
+                                  th:text="${app.status != null ? app.status.displayName : 'Unknown'}">Status</span>
+                        </div>
+
+                        <!-- AI Score bar -->
+                        <div class="mb-3" th:if="${app.matchScore != null and app.matchScore > 0}">
+                            <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-1">
+                                <span>AI Match</span>
+                                <span th:text="${#numbers.formatDecimal(app.matchScore, 1, 0)} + '%'"
+                                      th:classappend="${app.matchScore >= 70} ? 'text-emerald-400' : (${app.matchScore >= 50} ? 'text-amber-400' : 'text-rose-400')"></span>
+                            </div>
+                            <div class="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all"
+                                     th:classappend="${app.matchScore >= 70} ? 'bg-emerald-500' : (${app.matchScore >= 50} ? 'bg-amber-500' : 'bg-rose-500')"
+                                     th:style="'width: ' + ${app.matchScore} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Interview mini-badge if scheduled -->
+                        <div th:if="${app.interviewScheduled}" class="flex items-center gap-2 mb-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-3 py-2">
+                            <i class="bi bi-calendar-check-fill text-indigo-400 text-xs"></i>
+                            <span class="text-xs font-bold text-indigo-300"
+                                  th:text="${#temporals.format(app.interviewDate, 'dd MMM yyyy, HH:mm')}"></span>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                            <span class="text-[10px] text-foreground-subtle">
+                                Applied <span th:text="${#temporals.format(app.appliedDate, 'dd MMM yyyy')}"></span>
+                            </span>
+                            <a th:href="@{/applications/{id}(id=${app.id})}"
+                               class="text-[10px] font-black uppercase tracking-widest text-accent-bright hover:underline flex items-center gap-1">
+                                View <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

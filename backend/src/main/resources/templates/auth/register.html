@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - AI Recruitment System</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <!-- Simple JS logic translated for Tailwind -->
+    <script>
+        function selectRole(role) {
+            document.getElementById('selectedRole').value = role;
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('ring-4', 'ring-clay-accent', 'bg-accent/5'));
+            document.getElementById('role' + role).classList.add('ring-4', 'ring-clay-accent', 'bg-accent/5');
+            document.querySelectorAll('.role-card-icon').forEach(icon => icon.classList.remove('scale-110'));
+            document.getElementById('icon' + role).classList.add('scale-110');
+        }
+
+        function checkPasswordStrength() {
+            const pwd = document.getElementById('password').value;
+            const bar = document.getElementById('passwordStrength');
+            const text = document.getElementById('passwordFeedback');
+            let str = 0;
+            if (pwd.length >= 8) str += 25;
+            if (/[A-Z]/.test(pwd)) str += 25;
+            if (/[0-9]/.test(pwd)) str += 25;
+            if (/[^A-Za-z0-9]/.test(pwd)) str += 25;
+            
+            bar.style.width = str + '%';
+            if (str < 50) { bar.className = 'h-full bg-rose-500 rounded-full transition-all'; text.textContent = 'Weak'; text.className = 'text-xs font-bold text-rose-400 mt-1'; }
+            else if (str < 75) { bar.className = 'h-full bg-amber-500 rounded-full transition-all'; text.textContent = 'Moderate'; text.className = 'text-xs font-bold text-amber-400 mt-1'; }
+            else { bar.className = 'h-full bg-emerald-500 rounded-full transition-all'; text.textContent = 'Strong'; text.className = 'text-xs font-bold text-emerald-400 mt-1'; }
+        }
+
+        function checkPasswordMatch() {
+            const pwd = document.getElementById('password').value;
+            const cfm = document.getElementById('confirmPassword').value;
+            const txt = document.getElementById('passwordMatch');
+            if (cfm.length === 0) { txt.textContent = ''; return; }
+            if (pwd === cfm) { txt.innerHTML = '<span class="text-xs font-bold text-emerald-400"><i class="bi bi-check-circle"></i> Passwords match</span>'; }
+            else { txt.innerHTML = '<span class="text-xs font-bold text-rose-400"><i class="bi bi-x-circle"></i> Passwords do not match</span>'; }
+        }
+
+        function validateForm() {
+            if (!document.getElementById('terms').checked) { alert('You must agree to the terms.'); return false; }
+            if (document.getElementById('password').value !== document.getElementById('confirmPassword').value) { alert('Passwords mismatch.'); return false; }
+            if (document.getElementById('password').value.length < 8) { alert('Password must be 8+ chars.'); return false; }
+            return true;
+        }
+    </script>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden m-0 p-4 pb-20 sm:p-8" onload="selectRole('CANDIDATE')">
+
+    <!-- Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <!-- Go Back -->
+    <a href="/" class="absolute top-4 left-4 sm:top-8 sm:left-8 w-12 h-12 rounded-full bg-white flex items-center justify-center text-foreground-muted hover:text-accent shadow-modern-button hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all text-xl z-20">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+
+    <div class="max-w-4xl mx-auto relative z-10 pt-16 sm:pt-4">
+        
+        <div class="modern-card p-0 flex flex-col group overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-br from-emerald-400 to-clay-tertiary text-white p-10 text-center relative overflow-hidden">
+                <i class="bi bi-person-plus-fill text-8xl opacity-10 absolute -left-4 -bottom-4 animate-blob-float-slow"></i>
+                <h2 class="text-4xl font-black font-heading tracking-tight mb-2">Create Account</h2>
+                <p class="text-sm font-bold opacity-80 uppercase tracking-widest">Join the AI Recruitment Engine</p>
+            </div>
+
+            <div class="p-6 sm:p-12">
+                <!-- Alerts -->
+                <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm flex items-center gap-3 mb-6 font-bold text-sm">
+                    <i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span>
+                </div>
+                <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 text-rose-400 p-4 rounded-2xl shadow-sm flex items-center gap-3 mb-6 font-bold text-sm">
+                    <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+                </div>
+
+                <form th:action="@{/auth/register}" method="post" onsubmit="return validateForm()">
+                    
+                    <h4 class="text-2xl font-extrabold mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-person-vcard text-foreground-subtle"></i> Basic Info
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">First Name <span class="text-rose-400">*</span></label>
+                            <input type="text" name="firstName" required class="modern-input shadow-inner" placeholder="e.g. John">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Last Name <span class="text-rose-400">*</span></label>
+                            <input type="text" name="lastName" required class="modern-input shadow-inner" placeholder="e.g. Doe">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Username <span class="text-rose-400">*</span></label>
+                            <div class="relative">
+                                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-foreground-muted font-bold">@</span>
+                                <input type="text" name="username" required class="modern-input pl-10 shadow-inner" placeholder="johndoe123">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Email Address <span class="text-rose-400">*</span></label>
+                            <input type="email" name="email" required class="modern-input shadow-inner" placeholder="john@example.com">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Phone Number <span class="text-rose-400">*</span></label>
+                            <input type="tel" name="phoneNumber" required pattern="[0-9]{10}" maxlength="10" class="modern-input shadow-inner" placeholder="10 Digits (e.g. 9876543210)">
+                        </div>
+                    </div>
+
+                    <h4 class="text-2xl font-extrabold mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-tags-fill text-accent-alt"></i> Select Role
+                    </h4>
+
+                    <input type="hidden" name="role" id="selectedRole" value="CANDIDATE">
+                    <div class="grid grid-cols-1 gap-4 mb-10">
+                        <!-- Candidate -->
+                        <div class="role-card bg-surface rounded-[24px] p-4 sm:p-6 text-center shadow-sm cursor-pointer transition-all duration-300 ring-transparent" id="roleCANDIDATE" onclick="selectRole('CANDIDATE')">
+                            <div id="iconCANDIDATE" class="role-card-icon w-12 h-12 sm:w-16 sm:h-16 rounded-[20px] bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center mx-auto text-2xl sm:text-3xl mb-3 shadow-inner transition-transform"><i class="bi bi-person-badge"></i></div>
+                            <h6 class="font-extrabold text-sm sm:text-base text-foreground">Candidate</h6>
+                            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-foreground-muted mt-1">Job Seeker</p>
+                        </div>
+                    </div>
+
+                    <h4 class="text-2xl font-extrabold mb-6 flex items-center gap-3 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-shield-lock-fill text-amber-400"></i> Local Security
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Password <span class="text-rose-400">*</span></label>
+                            <input type="password" id="password" name="password" required onkeyup="checkPasswordStrength()" class="modern-input shadow-inner" placeholder="Min. 8 chars">
+                            <div class="mt-3 h-1.5 w-full bg-surface rounded-full shadow-inset overflow-hidden">
+                                <div id="passwordStrength" class="h-full w-0 transition-all duration-300"></div>
+                            </div>
+                            <div id="passwordFeedback" class="mt-1"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground-muted tracking-widest uppercase mb-2 ml-2">Confirm Password <span class="text-rose-400">*</span></label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required onkeyup="checkPasswordMatch()" class="modern-input shadow-inner" placeholder="Retype password">
+                            <div id="passwordMatch" class="mt-2"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms -->
+                    <div class="mb-10 px-4 py-3 bg-white/[0.06] rounded-xl border border-white/60 flex items-start gap-3">
+                        <input type="checkbox" id="terms" required class="mt-1 w-5 h-5 rounded border-border-default text-accent focus:ring-clay-accent cursor-pointer shadow-inner">
+                        <label for="terms" class="text-sm font-medium text-foreground-muted cursor-pointer">
+                            I agree to the <span class="font-bold text-accent hover:underline">Terms of Service</span> and consent to AI processing of my data. <span class="text-rose-400">*</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a th:href="@{/auth/login}" class="modern-btn modern-btn-secondary w-full sm:w-1/3 flex items-center justify-center gap-2">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                        <button type="submit" class="modern-btn modern-btn-success w-full sm:w-2/3 flex items-center justify-center gap-2 text-lg">
+                            Create Account <i class="bi bi-person-plus-fill"></i>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

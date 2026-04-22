@@ -1,0 +1,111 @@
+<!-- fragments/header.html -->
+<header th:fragment="header" class="w-full px-4 pt-6 sm:px-8 max-w-7xl mx-auto z-50 relative"
+        xmlns:sec="http://www.w3.org/1999/xhtml">
+    <nav
+        class="flex items-center justify-between h-16 sm:h-20 px-6 sm:px-8 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] shadow-modern-card transition-all duration-300">
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-3 xl:gap-4 group">
+            <div
+                class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-white shadow-[0_0_15px_rgba(94,106,210,0.4)] group-active:scale-95 transition-all duration-300">
+                <i class="bi bi-robot text-lg"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-heading font-semibold text-xl leading-none tracking-tight text-foreground">AI
+                    Recruit</span>
+                <span
+                    class="text-[10px] font-medium tracking-widest text-foreground-muted uppercase mt-0.5">Platform</span>
+            </div>
+        </a>
+
+        <!-- Desktop Navigation: Common / Role-Based -->
+        <div class="hidden lg:flex items-center gap-1">
+            <a href="/"
+                class="px-3 py-2 font-medium text-sm text-foreground rounded-lg hover:bg-white/[0.05] transition-colors">Home</a>
+
+            <!-- CANDIDATE Nav -->
+            <div sec:authorize="hasRole('CANDIDATE')"
+                class="flex items-center gap-1 border-l border-white/[0.08] pl-2 ml-1">
+                <a href="/candidate/dashboard"
+                    class="px-3 py-2 font-medium text-sm text-foreground-muted hover:text-foreground hover:bg-white/[0.05] transition-colors rounded-lg">Dashboard</a>
+                <a href="/jobs/browse"
+                    class="px-3 py-2 font-medium text-sm text-foreground-muted hover:text-foreground hover:bg-white/[0.05] transition-colors rounded-lg">Jobs</a>
+                <a href="/candidate/profile"
+                    class="px-3 py-2 font-medium text-sm text-foreground-muted hover:text-foreground hover:bg-white/[0.05] transition-colors rounded-lg">Profile</a>
+                <a href="/skill-match/my-results"
+                    class="px-3 py-2 font-medium text-sm text-foreground-muted hover:text-foreground hover:bg-white/[0.05] transition-colors rounded-lg">Matches</a>
+                <a href="/applications/my-applications"
+                    class="px-3 py-2 font-medium text-sm text-foreground-muted hover:text-foreground hover:bg-white/[0.05] transition-colors rounded-lg">My
+                    Applications</a>
+            </div>
+
+            <!-- HR Nav -->
+            <div sec:authorize="hasRole('HR')" class="flex items-center gap-1 border-l border-white/[0.08] pl-2 ml-1">
+                <a href="/hr/dashboard"
+                    class="px-3 py-2 font-medium text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition-colors rounded-lg">HR
+                    Dashboard</a>
+                <a href="/hr/candidates"
+                    class="px-3 py-2 font-medium text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition-colors rounded-lg">Candidates</a>
+                <a href="/jobs/manage"
+                    class="px-3 py-2 font-medium text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition-colors rounded-lg">Manage
+                    Jobs</a>
+                <a href="/skill-match/dashboard"
+                    class="px-3 py-2 font-medium text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition-colors rounded-lg">AI
+                    Match</a>
+
+                <a href="/ranking/dashboard"
+                   class="px-3 py-2 font-medium text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition-colors rounded-lg">Rankings</a>
+            </div>
+
+            <!-- ADMIN Nav -->
+            <div sec:authorize="hasRole('ADMIN')"
+                class="flex items-center gap-1 border-l border-white/[0.08] pl-2 ml-1">
+                <a href="/admin/dashboard"
+                    class="px-3 py-2 font-medium text-sm text-accent hover:text-accent-bright hover:bg-accent/10 transition-colors rounded-lg">Admin
+                    Core</a>
+                <a href="/admin/users"
+                    class="px-3 py-2 font-medium text-sm text-accent hover:text-accent-bright hover:bg-accent/10 transition-colors rounded-lg">Users</a>
+                <a href="/jobs/manage"
+                    class="px-3 py-2 font-medium text-sm text-accent hover:text-accent-bright hover:bg-accent/10 transition-colors rounded-lg">Jobs</a>
+                <a href="/ranking/dashboard"
+                    class="px-3 py-2 font-medium text-sm text-accent hover:text-accent-bright hover:bg-accent/10 transition-colors rounded-lg">Rankings</a>
+            </div>
+        </div>
+
+        <!-- User Actions -->
+        <div class="flex items-center gap-3">
+
+            <!-- Not Logged In -->
+            <div sec:authorize="!isAuthenticated()" class="hidden sm:flex items-center gap-3">
+                <a href="/auth/login"
+                    class="font-medium text-sm text-foreground-muted hover:text-foreground transition-colors px-4">Login</a>
+                <a href="/auth/register" class="modern-btn modern-btn-primary h-9">Sign Up</a>
+            </div>
+
+            <!-- Logged In Profile -->
+            <div sec:authorize="isAuthenticated()" class="flex items-center gap-3 flex-shrink-0">
+                <div
+                    class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface rounded-lg border border-white/[0.06]">
+                    <div
+                        class="w-6 h-6 rounded-md bg-white/[0.08] border border-white/10 text-foreground flex items-center justify-center font-bold text-[10px] shadow-inner">
+                        <i class="bi bi-person text-foreground-subtle"></i>
+                    </div>
+                    <span sec:authentication="name"
+                        class="font-medium text-sm text-foreground truncate max-w-[120px]">User</span>
+                </div>
+                <a href="/auth/logout"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg text-foreground-muted hover:bg-white/[0.05] hover:text-foreground transition-all duration-200"
+                    title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button
+                class="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-foreground-muted hover:bg-white/[0.05] hover:text-foreground transition-all">
+                <i class="bi bi-list text-xl"></i>
+            </button>
+
+        </div>
+    </nav>
+</header>

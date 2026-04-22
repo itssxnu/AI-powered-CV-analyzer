@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - Candidate</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div class="flex items-start gap-4">
+                <a href="/candidate/dashboard" class="mt-1 w-12 h-12 rounded-full bg-white text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                        <i class="bi bi-send-fill text-emerald-400"></i> My Network Handshakes
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                        Total Sent Payloads: <span class="text-accent font-mono ml-1 px-2 py-0.5 bg-accent/10 rounded" th:text="${applications.size()}">0</span>
+                    </p>
+                </div>
+            </div>
+            
+            <a href="/jobs/browse" class="modern-btn modern-btn-primary shrink-0 bg-indigo-500 hover:bg-indigo-600 border-indigo-400">
+                <i class="bi bi-search mr-2"></i> Scan Network
+            </a>
+        </div>
+
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Data Grid Surface -->
+        <div class="modern-card p-0 overflow-hidden border-t-4 border-t-emerald-500">
+            
+            <div class="p-6 bg-white/[0.04] border-b border-white/[0.08] flex justify-between items-center backdrop-blur-sm">
+                <h5 class="font-black text-foreground flex items-center gap-2"><i class="bi bi-clock-history text-accent"></i> Historical Transmission Log</h5>
+            </div>
+
+            <div th:if="${applications.isEmpty()}" class="py-24 text-center">
+                <div class="w-24 h-24 rounded-3xl bg-surface text-slate-300 flex items-center justify-center text-5xl mx-auto shadow-inner mb-6 border border-white/[0.08]">
+                    <i class="bi bi-send-slash text-foreground-subtle"></i>
+                </div>
+                <h3 class="text-2xl font-black mb-2 text-foreground">No Handshakes Found</h3>
+                <p class="text-foreground-muted font-medium mb-8 max-w-md mx-auto">Your payload transmission log is empty. Try scanning the active network for matching nodes.</p>
+                <a href="/jobs/browse" class="modern-btn modern-btn-success shadow-emerald-500/30">
+                    <i class="bi bi-search mr-2"></i> Open Job Scanner
+                </a>
+            </div>
+
+            <div th:unless="${applications.isEmpty()}" class="overflow-x-auto">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-white/[0.04] backdrop-blur-sm border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-foreground-subtle">
+                        <tr>
+                            <th class="py-4 px-6">Definition Matrix</th>
+                            <th class="py-4 px-6 text-center">AI Alignment</th>
+                            <th class="py-4 px-6">Timestamp Log</th>
+                            <th class="py-4 px-6">Connection State</th>
+                            <th class="py-4 px-6 text-right">Overrides</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.08] font-medium text-sm">
+                        
+                        <tr th:each="app : ${applications}" class="hover:bg-accent/10/30 transition-colors group">
+                            
+                            <!-- Job Profile -->
+                            <td class="py-4 px-6">
+                                <div class="flex flex-col">
+                                    <span class="font-black text-foreground text-lg group-hover:text-accent transition-colors" th:text="${app.job.title}"></span>
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <span class="text-xs font-bold text-foreground-subtle flex items-center gap-1"><i class="bi bi-building"></i> <span th:text="${app.job.department}"></span></span>
+                                        <span class="text-xs font-bold text-foreground-subtle flex items-center gap-1"><i class="bi bi-geo-alt"></i> <span th:text="${app.job.location}"></span></span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Match Score -->
+                            <td class="py-4 px-6 text-center">
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl shadow-sm border-2 text-lg font-black mx-auto"
+                                     th:classappend="${app.matchScore != null ? (app.matchScore >= 80 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-200' : (app.matchScore >= 60 ? 'bg-amber-500/10 text-amber-400 border-amber-200' : 'bg-rose-500/10 text-rose-400 border-rose-200')) : 'bg-white/[0.02] text-foreground-subtle border-white/[0.08]'}">
+                                    <span th:if="${app.matchScore != null}" th:text="${#numbers.formatDecimal(app.matchScore, 0, 0)}">85</span>
+                                    <i th:unless="${app.matchScore != null}" class="bi bi-dash"></i>
+                                </div>
+                            </td>
+
+                            <!-- App Date -->
+                            <td class="py-4 px-6">
+                                <span class="font-mono text-xs bg-surface px-2.5 py-1.5 rounded-lg border border-white/[0.08] text-foreground-muted font-bold shadow-sm inline-flex items-center gap-2">
+                                    <i class="bi bi-calendar-check text-foreground-subtle"></i> <span th:text="${#temporals.format(app.appliedDate, 'dd/MM/yy HH:mm')}"></span>
+                                </span>
+                            </td>
+
+                            <!-- App Status Tag -->
+                            <td class="py-4 px-6">
+                                <span th:class="'inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-sm border ' + 
+                                    (${app.status.name() == 'PENDING'} ? 'bg-amber-500/10 text-amber-400 border-amber-200' : 
+                                    (${app.status.name() == 'SHORTLISTED'} ? 'bg-sky-50 text-sky-700 border-sky-200' : 
+                                    (${app.status.name() == 'INTERVIEW'} ? 'bg-accent/10 text-accent border-indigo-200' : 
+                                    (${app.status.name() == 'REJECTED'} ? 'bg-rose-500/10 text-rose-400 border-rose-200' : 'bg-emerald-500/10 text-emerald-400 border-emerald-200'))))">
+                                    <i class="bi bi-record-circle-fill"></i> <span th:text="${app.status.displayName}">Pending</span>
+                                </span>
+                            </td>
+
+                            <!-- Overrides -->
+                            <td class="py-4 px-6 text-right">
+                                <div class="inline-flex bg-surface p-1 rounded-2xl shadow-inner border border-white/[0.08]">
+                                    <a th:href="@{/jobs/view/{id}(id=${app.job.id})}" class="w-10 h-10 flex items-center justify-center rounded-xl text-foreground-subtle bg-white hover:bg-white hover:text-accent hover:shadow-sm transition-all" title="View Target Node">
+                                        <i class="bi bi-eye-fill text-lg"></i>
+                                    </a>
+                                    
+                                    <button th:if="${app.status.name() == 'PENDING'}" th:onclick="'withdrawApplication(' + ${app.id} + ')'" class="w-10 h-10 flex items-center justify-center rounded-xl text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 hover:text-amber-400 transition-all ml-1 border border-transparent hover:border-amber-200" title="Abort Handshake">
+                                        <i class="bi bi-x-circle-fill text-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function withdrawApplication(applicationId) {
+            if (confirm('DESTRUCTIVE PROTOCOL:\nWithdraw handshake attempt with this node?')) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+                fetch(`/jobs/withdraw/${applicationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                }).then(response => {
+                    if (response.redirected) window.location.href = response.url;
+                    else window.location.reload();
+                }).catch(err => alert("Protocol Error: " + err));
+            }
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

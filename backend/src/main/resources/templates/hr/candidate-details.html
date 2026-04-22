@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Profile - HR Portal</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden m-0 p-0 antialiased pb-20">
+
+    <!-- Ambient Blobs -->
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Alerts -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 backdrop-blur-md text-emerald-400 p-6 rounded-[24px] shadow-sm flex items-center justify-between border border-emerald-200">
+            <div class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}" class="font-bold"></span></div>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 backdrop-blur-md text-rose-400 p-6 rounded-[24px] shadow-sm flex items-center justify-between border border-rose-200">
+            <div class="flex items-center gap-3"><i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}" class="font-bold"></span></div>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Back & Title -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+             <div class="flex items-center gap-6">
+                <a th:href="@{/hr/candidates}" class="w-14 h-14 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center hover:text-accent-bright hover:bg-white/[0.04] hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                    <i class="bi bi-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-5xl font-black tracking-tight text-foreground" th:text="${candidate.fullName}">Candidate Profile</h1>
+                    <div class="flex items-center gap-3 mt-2 text-foreground-muted font-bold text-sm uppercase tracking-widest">
+                        <span th:if="${candidate.active}" class="text-emerald-400 flex items-center gap-1"><i class="bi bi-circle-fill text-[8px]"></i> Active Member</span>
+                        <span th:unless="${candidate.active}" class="text-rose-400 flex items-center gap-1"><i class="bi bi-circle-fill text-[8px]"></i> Inactive</span>
+                        <span class="w-1 h-1 rounded-full bg-clay-muted/30"></span>
+                        <span th:text="'Joined ' + ${#temporals.format(candidate.createdAt, 'MMM yyyy')}">Joined Jan 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Quick Action -->
+            <form th:action="@{/hr/candidates/{id}/process-ai(id=${candidate.id})}" method="post" class="flex-shrink-0">
+                <input type="hidden" name="forceReprocess" value="false">
+                <button type="submit" class="modern-btn modern-btn-primary shadow-modern-button hover:shadow-modern-buttonHover flex items-center gap-2 group">
+                    <i class="bi bi-cpu group-hover:rotate-180 transition-transform duration-500"></i> Run AI Analysis
+                </button>
+            </form>
+        </div>
+
+        <!-- Bento Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Core Info & Experience (Spans 2 columns) -->
+            <div class="lg:col-span-2 space-y-8 flex flex-col">
+                
+                <!-- Personal Info Card -->
+                <div class="modern-card">
+                    <h3 class="text-2xl font-extrabold mb-6 flex items-center gap-3"><i class="bi bi-person-vcard text-foreground-subtle"></i> Candidate Overview</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Contact Info -->
+                        <div class="space-y-4">
+                            <div class="bg-white/[0.06] p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-surface border border-white/[0.08] text-accent flex items-center justify-center"><i class="bi bi-envelope-fill"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Email Address</p>
+                                    <p class="font-bold text-foreground truncate" style="max-width:200px" th:text="${candidate.email}"></p>
+                                </div>
+                            </div>
+                            <div class="bg-white/[0.06] p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-surface border border-white/[0.08] text-emerald-400 flex items-center justify-center"><i class="bi bi-telephone-fill"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Phone Number</p>
+                                    <p class="font-bold text-foreground" th:text="${candidate.phone != null ? candidate.phone : 'Not provided'}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Status -->
+                        <div class="space-y-4">
+                            <div class="bg-white/[0.06] p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-surface border border-white/[0.08] text-pink-500 flex items-center justify-center"><i class="bi bi-robot"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">AI Analysis Status</p>
+                                    <p th:if="${currentResume != null and currentResume.mlProcessed}" class="font-bold text-emerald-400">Successfully Processed</p>
+                                    <p th:unless="${currentResume != null and currentResume.mlProcessed}" class="font-bold text-amber-400">Analysis Pending</p>
+                                </div>
+                            </div>
+                            <div class="bg-white/[0.06] p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-surface border border-white/[0.08] text-accent flex items-center justify-center"><i class="bi bi-bar-chart-steps"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">AI Career Level</p>
+                                    <span th:if="${candidate.careerLevel != null}"
+                                          th:text="${candidate.careerLevel}"
+                                          th:classappend="${candidate.careerLevel == 'Senior'} ? 'text-emerald-400' : (${candidate.careerLevel == 'Mid'} ? 'text-accent' : 'text-amber-400')"
+                                          class="font-black text-lg tracking-wide"></span>
+                                    <span th:unless="${candidate.careerLevel != null}" class="font-bold text-foreground-muted text-sm">Not classified yet</span>
+                                </div>
+                            </div>
+                            <div class="bg-white/[0.06] p-4 rounded-2xl flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center"><i class="bi bi-clock-history"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-0.5">Last System Update</p>
+                                    <p class="font-bold text-foreground" th:text="${#temporals.format(candidate.updatedAt, 'MMM dd, yyyy - HH:mm')}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Profile -->
+                <div class="modern-card">
+                    <h3 class="text-2xl font-extrabold mb-8 flex items-center gap-3"><i class="bi bi-briefcase-fill text-accent-alt"></i> Professional Profile</h3>
+                    
+                    <div class="bg-surface rounded-[24px] p-6 shadow-inner mb-8">
+                        <p class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest mb-3">Extracted Skills</p>
+                        <div class="flex flex-wrap gap-2" th:if="${candidate.skills != null and !candidate.skills.isEmpty()}">
+                            <div th:each="skill : ${#strings.listSplit(candidate.skills, ',')}" class="bg-white/[0.06] border border-white/[0.08] text-accent px-4 py-2 rounded-xl text-sm font-bold hover:-translate-y-0.5 transition-transform cursor-default" th:text="${skill.trim()}">
+                            </div>
+                        </div>
+                        <p th:unless="${candidate.skills != null and !candidate.skills.isEmpty()}" class="font-bold text-foreground-muted">No skills automatically extracted yet.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white/[0.06] rounded-[24px] p-6 border border-white/[0.08]">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl mb-4"><i class="bi bi-award-fill"></i></div>
+                            <h4 class="font-extrabold text-lg mb-1">Experience</h4>
+                            <p class="text-foreground-muted font-medium" th:if="${candidate.experienceYears != null}" th:text="${candidate.experienceYears} + ' years of professional experience'"></p>
+                            <p class="text-foreground-muted font-medium opacity-60" th:unless="${candidate.experienceYears != null}">Experience not specified</p>
+                        </div>
+                        
+                        <div class="bg-white/[0.06] rounded-[24px] p-6 border border-white/[0.08]">
+                            <div class="w-12 h-12 rounded-2xl bg-accent/20 border border-accent/20 text-accent flex items-center justify-center text-xl mb-4"><i class="bi bi-mortarboard-fill"></i></div>
+                            <h4 class="font-extrabold text-lg mb-1">Education</h4>
+                            <p class="text-foreground-muted font-medium" th:if="${candidate.education != null}" th:text="${candidate.education}"></p>
+                            <p class="text-foreground-muted font-medium opacity-60" th:unless="${candidate.education != null}">Education history absent</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Applications -->
+                 <div class="modern-card">
+                    <h3 class="text-2xl font-extrabold mb-6 flex items-center gap-3"><i class="bi bi-send-fill text-emerald-400"></i> Applications</h3>
+                    
+                    <div class="space-y-4">
+                        <div th:each="app : ${candidateApplications}" class="bg-surface border border-white/[0.06] p-5 rounded-[24px] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-foreground" th:text="${app.job.title}">Software Engineer</h4>
+                                <p class="text-xs font-bold text-foreground-muted uppercase tracking-widest mt-1">Applied <span th:text="${#temporals.format(app.appliedDate, 'MMM dd, yyyy')}"></span></p>
+                            </div>
+                            
+                            <div class="flex items-center gap-4">
+                                <div class="px-4 py-2 rounded-xl text-sm font-bold shadow-inset bg-surface">
+                                    <span th:text="${app.status.displayName}">Pending</span>
+                                </div>
+                                
+                                <div th:if="${app.matchScore != null}" class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white shadow-sm"
+                                     th:classappend="${app.matchScore >= 80 ? 'bg-emerald-500' : (app.matchScore >= 60 ? 'bg-amber-500' : 'bg-rose-500')}">
+                                    <span th:text="${#numbers.formatDecimal(app.matchScore, 0, 0)}">85</span>
+                                </div>
+                                <div th:unless="${app.matchScore != null}" class="w-12 h-12 rounded-full bg-clay-muted/20 flex items-center justify-center font-bold text-foreground-muted shadow-sm" title="Score N/A">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${candidateApplications == null or candidateApplications.isEmpty()}" class="py-8 text-center bg-white/[0.04] rounded-[24px]">
+                            <p class="font-bold text-foreground-muted">Candidate hasn't applied to any roles yet.</p>
+                        </div>
+                    </div>
+                 </div>
+
+            </div>
+
+            <!-- Right Column: AI Analysis & Actions -->
+            <div class="space-y-8 flex flex-col">
+                
+                <!-- AI Analysis Card -->
+                <div class="modern-card relative overflow-hidden bg-gradient-to-br from-[#7C3AED] to-[#DB2777] text-white">
+                    <!-- Deco shapes -->
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-black/10 rounded-full blur-xl pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-extrabold mb-8 flex items-center justify-center gap-3"><i class="bi bi-stars"></i> Intelligence Score</h3>
+                        
+                        <div th:if="${currentResume != null and currentResume.mlProcessed}">
+                            <div class="flex flex-col items-center justify-center mb-10">
+                                <div class="w-32 h-32 rounded-full bg-white/20 shadow-inner backdrop-blur-md flex items-center justify-center mb-4 border-2 border-white/30">
+                                    <i class="bi bi-robot text-5xl opacity-80"></i>
+                                </div>
+                                <span class="bg-white/20 px-4 py-1.5 rounded-3xl text-xs font-bold uppercase tracking-widest backdrop-blur-sm">Analysis Complete</span>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold uppercase tracking-widest mb-2 opacity-80">
+                                        <span>Text Extraction</span>
+                                        <span th:text="${#numbers.formatDecimal(currentResume.mlConfidence * 100, 1, 0)} + '%'">90%</span>
+                                    </div>
+                                    <div class="h-3 bg-black/20 rounded-full overflow-hidden shadow-inset">
+                                        <div class="h-full bg-white rounded-full shadow-sm" th:style="'width: ' + ${currentResume.mlConfidence * 100} + '%;'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:unless="${currentResume != null and currentResume.mlProcessed}" class="text-center py-6">
+                            <div class="w-24 h-24 mx-auto rounded-full bg-white/20 shadow-inner backdrop-blur-md flex items-center justify-center mb-6 text-4xl">
+                                <i class="bi bi-robot opacity-50"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">Analysis Pending</h4>
+                            <p class="text-sm opacity-80 mb-6">Process this user's resume using the AI Pipeline.</p>
+                            
+                            <form th:action="@{/hr/candidates/{id}/process-ai(id=${candidate.id})}" method="post">
+                                <input type="hidden" name="forceReprocess" value="false">
+                                <button type="submit" class="w-full h-12 bg-white text-accent rounded-xl font-bold hover:shadow-lg hover:-translate-y-1 transition-all active:scale-95 shadow-md">
+                                    Run Pipeline
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Card -->
+                <div class="modern-card">
+                    <h3 class="text-xl font-extrabold mb-6">HR Actions</h3>
+                    
+                    <div class="flex flex-col gap-4">
+                        <!-- Contact -->
+                        <button class="relative overflow-hidden w-full bg-surface hover:bg-white rounded-[20px] p-4 text-left transition-all duration-300 shadow-sm hover:shadow-modern-card group contact-btn"
+                                th:data-email="${candidate.email}"
+                                th:data-phone="${candidate.phone != null ? candidate.phone : ''}">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-600 text-white flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-foreground group-hover:text-accent transition-colors">Contact Candidate</h5>
+                                </div>
+                            </div>
+                        </button>
+
+                        <!-- Force Reprocess -->
+                        <form th:action="@{/hr/candidates/{id}/process-ai(id=${candidate.id})}" method="post" class="w-full">
+                            <input type="hidden" name="forceReprocess" value="true">
+                            <button type="submit" class="relative overflow-hidden w-full bg-surface hover:bg-white/[0.08] rounded-[20px] p-4 text-left transition-all duration-300 shadow-sm group">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform group-active:rotate-180 duration-500">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h5 class="font-bold text-foreground group-hover:text-amber-400 transition-colors">Force AI Evaluation</h5>
+                                    </div>
+                                </div>
+                            </button>
+                        </form>
+
+                        <!-- Download Resume -->
+                        <a th:if="${currentResume != null}" th:href="@{/hr/candidates/{id}/resume/download(id=${candidate.id})}" class="relative overflow-hidden w-full bg-surface hover:bg-white/[0.08] rounded-[20px] p-4 text-left transition-all duration-300 shadow-sm group block">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-500 to-slate-700 text-white flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                    <i class="bi bi-download"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-foreground group-hover:text-foreground-muted transition-colors">Download Resume PDF</h5>
+                                </div>
+                            </div>
+                        </a>
+                        <div th:unless="${currentResume != null}" class="relative overflow-hidden w-full bg-surface opacity-50 rounded-[20px] p-4 text-left cursor-not-allowed">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-300 text-white flex items-center justify-center shadow-inner">
+                                    <i class="bi bi-file-earmark-x"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-foreground">No Resume Available</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match Results -->
+                        <a th:href="@{/skill-match/candidate/{id}(id=${candidate.id})}" class="relative overflow-hidden w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-[20px] p-4 text-left transition-all duration-300 shadow-sm hover:shadow-modern-card group block border border-emerald-200">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-emerald-400 transition-colors">Advanced Match Reports</h5>
+                                </div>
+                            </div>
+                        </a>
+                        
+                        <!-- Raw Extracted Text -->
+                         <a th:if="${currentResume != null}" th:href="@{/hr/candidates/{id}/resume/text(id=${candidate.id})}" class="relative overflow-hidden w-full bg-surface hover:bg-surface-hover rounded-[20px] p-4 text-left transition-all duration-300 shadow-sm hover:shadow-modern-card group block mt-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-lg bg-clay-muted/20 text-foreground-muted flex items-center justify-center">
+                                    <i class="bi bi-braces"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-sm text-foreground group-hover:text-accent transition-colors">View Raw JSON / Text</h5>
+                                </div>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                 <!-- Resume Version History -->
+                <div class="modern-card" th:if="${allResumes != null and !allResumes.isEmpty()}">
+                    <h3 class="text-xl font-extrabold mb-6">Archive Versions</h3>
+                    
+                    <div class="flex flex-col gap-3">
+                        <div th:each="resume : ${allResumes}" class="bg-surface border border-white/[0.08] p-4 rounded-[20px] flex items-center justify-between">
+                            <div>
+                                <h5 class="font-bold text-sm mb-1">Version <span th:text="${resume.version}"></span></h5>
+                                <p class="text-[10px] uppercase tracking-widest text-foreground-muted font-bold" th:text="${#temporals.format(resume.uploadDate, 'MMM dd, yyyy')}"></p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span th:if="${resume.current}" class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-lg">Current</span>
+                                <span th:if="${resume.mlProcessed}" class="bg-accent/20 border border-accent/20 text-accent text-[10px] font-bold px-2 py-1 rounded-lg"><i class="bi bi-robot"></i> Analyzed</span>
+                                
+                                <a th:href="@{/hr/candidates/{id}/resume/view/{resumeId}(id=${candidate.id}, resumeId=${resume.id})}" class="w-8 h-8 rounded-lg bg-surface border border-white/[0.08] text-accent flex items-center justify-center hover:bg-accent hover:text-white transition-colors" target="_blank">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===== AI INTERVIEW Q&A SECTION ===== -->
+        <div class="modern-card p-6 sm:p-8 border border-white/[0.08]">
+            <h3 class="text-xl font-extrabold flex items-center gap-3 mb-6 border-b border-white/[0.08] pb-4">
+                <i class="bi bi-chat-square-quote-fill text-accent"></i> AI Interview Questions & Answers
+            </h3>
+
+            <!-- No Applications -->
+            <div th:if="${#lists.isEmpty(candidateApplications)}" class="text-center py-8 text-foreground-muted">
+                <i class="bi bi-inbox text-3xl"></i>
+                <p class="font-bold mt-2">No job applications found for this candidate.</p>
+            </div>
+
+            <!-- Per-Application Q&A -->
+            <div th:unless="${#lists.isEmpty(candidateApplications)}" class="space-y-6">
+                <div th:each="app : ${candidateApplications}" class="border border-white/[0.08] rounded-2xl overflow-hidden">
+                    <!-- Application Header Bar -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-5 bg-white/[0.02] border-b border-white/[0.08]">
+                        <div>
+                            <h4 class="font-black text-base" th:text="${app.job.title}">Job Title</h4>
+                            <p class="text-xs text-foreground-muted font-medium" th:text="${app.job.department}">Dept</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <!-- Status Badges -->
+                            <span th:if="${app.hasInterviewAnswers()}"
+                                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 border border-emerald-200">
+                                <i class="bi bi-check-circle-fill"></i> Answered
+                            </span>
+                            <span th:if="${app.hasInterviewQuestions() && !app.hasInterviewAnswers()}"
+                                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-amber-500/20 border border-amber-500/30 text-amber-400 border border-amber-200">
+                                <i class="bi bi-clock-fill"></i> Awaiting Answers
+                            </span>
+
+                            <!-- Generate Button -->
+                            <form th:action="@{/hr/applications/{id}/generate-questions(id=${app.id})}" method="post" class="inline">
+                                <button type="submit"
+                                        th:text="${app.hasInterviewQuestions()} ? 'Re-generate' : 'Generate Questions'"
+                                        th:classappend="${app.hasInterviewQuestions()} ? 'bg-surface text-foreground-muted border border-white/[0.08]' : 'bg-violet-600 text-white'"
+                                        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black shadow-modern-button hover:-translate-y-0.5 hover:shadow-modern-buttonHover transition-all">
+                                    <i class="bi bi-robot"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Q&A Content (only if questions exist) -->
+                    <div th:if="${app.hasInterviewQuestions()}" class="p-5 space-y-4">
+                        <!-- We parse the questions JSON inline via a script block below -->
+                        <div th:id="'qa-block-' + ${app.id}"></div>
+                        <script th:inline="javascript">
+                            (function() {
+                                var appId = [[${app.id}]];
+                                var questionsJson = [[${app.interviewQuestionsJson}]];
+                                var answersJson = [[${app.interviewAnswersJson}]];
+
+                                var questions = [];
+                                var answers = [];
+                                try { questions = typeof questionsJson === 'string' ? JSON.parse(questionsJson) : questionsJson; } catch(e) {}
+                                try { if (answersJson) answers = typeof answersJson === 'string' ? JSON.parse(answersJson) : answersJson; } catch(e) {}
+
+                                var container = document.getElementById('qa-block-' + appId);
+                                if (!container || !questions.length) return;
+
+                                var html = '';
+                                questions.forEach(function(q, i) {
+                                    var answer = (answers && answers[i]) ? (answers[i].answer || '') : '';
+                                    var category = q.category || 'Question';
+                                    var focus = q.focus || '';
+                                    var question = q.question || '';
+
+                                    html += '<div class="border border-white/[0.04] rounded-xl p-4">';
+                                    html += '<div class="flex items-center gap-2 mb-2">';
+                                    html += '<span class="w-6 h-6 rounded-lg bg-violet-600 text-white flex items-center justify-center text-xs font-black">' + (i+1) + '</span>';
+                                    html += '<span class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-accent/20 border border-accent/20 text-accent-bright">' + category + '</span>';
+                                    if (focus) html += '<span class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-surface text-foreground-subtle">' + focus + '</span>';
+                                    html += '</div>';
+                                    html += '<p class="font-bold text-sm text-foreground mb-2">' + question + '</p>';
+
+                                    if (answer) {
+                                        html += '<div class="bg-emerald-500/10 border border-emerald-200 rounded-xl p-3 mt-2">';
+                                        html += '<p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1"><i class="bi bi-chat-left-quote"></i> Candidate\'s Answer</p>';
+                                        html += '<p class="text-sm font-medium text-emerald-900 whitespace-pre-line">' + answer.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>';
+                                        html += '</div>';
+                                    } else {
+                                        html += '<p class="text-xs text-foreground-muted italic">No answer yet.</p>';
+                                    }
+                                    html += '</div>';
+                                });
+                                container.innerHTML = html;
+                            })();
+                        </script>
+                    </div>
+
+                    <!-- No questions yet -->
+                    <div th:unless="${app.hasInterviewQuestions()}" class="p-5 text-center text-foreground-muted text-sm font-medium">
+                        <i class="bi bi-chat-square-dots text-xl"></i>
+                        <p class="mt-1">No questions generated yet. Click "Generate Questions" to create AI-powered interview questions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Interactive Script -->
+    <script>
+        function contactCandidate(email, phone) {
+            let message = `Contact Information:\nEmail: ${email}\n`;
+            if (phone && phone.trim() !== '') {
+                message += `Phone: ${phone}\n`;
+            }
+            message += `\nActions:\n1. Copy Email address\n2. Open default Mail App`;
+            if (phone && phone.trim() !== '') message += `\n3. Call`;
+
+            const choice = prompt(message + '\n\nType number (1, 2, or 3):');
+            if (choice === '1') {
+                navigator.clipboard.writeText(email).then(() => alert('Email copied!'));
+            } else if (choice === '2') {
+                window.location.href = `mailto:${email}`;
+            } else if (choice === '3' && phone && phone.trim() !== '') {
+                window.location.href = `tel:${phone}`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.contact-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const email = this.getAttribute('data-email');
+                    const phone = this.getAttribute('data-phone');
+                    contactCandidate(email, phone);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

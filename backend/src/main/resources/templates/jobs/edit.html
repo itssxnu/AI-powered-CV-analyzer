@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Edit ' + ${job.title}">Edit Job</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <div class="flex items-center gap-4 mb-4">
+            <a href="/jobs/manage" class="w-12 h-12 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center hover:text-accent-bright hover:bg-white/[0.04] hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0 shadow-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight text-foreground">Edit Job</h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm mt-1">Editing: <span class="text-accent truncate max-w-[200px] sm:max-w-none inline-block align-bottom" th:text="${job.title}"></span></p>
+            </div>
+        </div>
+
+        <form th:action="@{/jobs/edit/{id}(id=${job.id})}" method="post" class="space-y-8">
+            
+            <input type="hidden" name="id" th:value="${job.id}">
+            <input type="hidden" name="postedBy" th:value="${job.postedBy.id}">
+            <input type="hidden" name="postedDate" th:value="${job.postedDate}">
+
+            <div class="modern-card p-6 sm:p-10 border-t-4 border-t-amber-400 bg-amber-500/10/20">
+                
+                <div class="flex items-center justify-between mb-8 border-b border-white/[0.08] pb-4">
+                    <h5 class="text-xl font-extrabold flex items-center gap-3 text-foreground">
+                        <i class="bi bi-pen-fill text-amber-400"></i> Job Details
+                    </h5>
+
+                    <!-- Active Toggle -->
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <span class="text-xs font-bold uppercase tracking-widest text-foreground-muted group-hover:text-foreground transition-colors">Active</span>
+                        <div class="relative">
+                            <input type="checkbox" name="active" class="sr-only peer" th:checked="${job.active}">
+                            <div class="w-11 h-6 bg-white/[0.08] rounded-full peer peer-checked:bg-emerald-500 transition-colors shadow-inner"></div>
+                            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5 shadow-sm"></div>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Title <span class="text-rose-400">*</span></label>
+                        <input type="text" name="title" required th:value="${job.title}" class="modern-input shadow-inner w-full text-lg font-bold">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Department <span class="text-rose-400">*</span></label>
+                        <select name="department" required class="modern-input shadow-inner w-full appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:24px] bg-[right:12px_center] bg-no-repeat">
+                            <option value="Engineering" th:selected="${job.department == 'Engineering'}">Engineering</option>
+                            <option value="Sales" th:selected="${job.department == 'Sales'}">Sales</option>
+                            <option value="Marketing" th:selected="${job.department == 'Marketing'}">Marketing</option>
+                            <option value="HR" th:selected="${job.department == 'HR'}">Human Resources</option>
+                            <option value="Finance" th:selected="${job.department == 'Finance'}">Finance</option>
+                            <option value="Operations" th:selected="${job.department == 'Operations'}">Operations</option>
+                            <option value="IT" th:selected="${job.department == 'IT'}">IT</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Location <span class="text-rose-400">*</span></label>
+                        <input type="text" name="location" required th:value="${job.location}" class="modern-input shadow-inner w-full">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Type <span class="text-rose-400">*</span></label>
+                        <select name="jobType" required class="modern-input shadow-inner w-full appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:24px] bg-[right:12px_center] bg-no-repeat">
+                            <option th:each="type : ${jobTypes}" th:value="${type.name()}" th:text="${type.displayName}" th:selected="${job.jobType.name() == type.name()}"></option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-foreground tracking-widest uppercase mb-2 ml-2 text-center">Vacancies <span class="text-rose-400">*</span></label>
+                            <input type="number" name="vacancies" required min="1" th:value="${job.vacancies}" class="modern-input shadow-inner w-full text-center font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-foreground tracking-widest uppercase mb-2 ml-2 text-center">Closing Date</label>
+                            <input type="datetime-local" name="expiryDateStr" th:value="${job.expiryDate != null} ? ${#temporals.format(job.expiryDate, 'yyyy-MM-dd') + 'T' + #temporals.format(job.expiryDate, 'HH:mm')} : ''" class="modern-input shadow-inner w-full text-xs text-center px-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value & Rules -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="modern-card p-6 sm:p-8 flex flex-col bg-white/[0.02]">
+                    <h5 class="text-lg font-extrabold flex items-center gap-3 mb-6 border-b border-white/[0.08] pb-4 text-emerald-400">
+                        <i class="bi bi-currency-dollar text-emerald-400"></i> Salary Range
+                    </h5>
+
+                    <div class="flex flex-col gap-6 flex-1 justify-center">
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-400/70 tracking-widest uppercase mb-2 ml-2">Min Salary ($)</label>
+                            <input type="number" name="minSalary" th:value="${job.minSalary}" class="modern-input shadow-inner w-full font-mono text-emerald-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-400/70 tracking-widest uppercase mb-2 ml-2">Max Salary ($)</label>
+                            <input type="number" name="maxSalary" th:value="${job.maxSalary}" class="modern-input shadow-inner w-full font-mono text-emerald-400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modern-card p-6 sm:p-8 flex flex-col border-t-4 border-t-amber-400">
+                    <h5 class="text-lg font-extrabold flex items-center gap-3 mb-6 border-b border-white/[0.08] pb-4 text-foreground">
+                        <i class="bi bi-card-checklist text-amber-400"></i> Requirements
+                    </h5>
+
+                    <div class="flex flex-col gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Experience Required <span class="text-rose-400">*</span></label>
+                            <input type="text" name="experienceRequired" th:value="${job.experienceRequired}" required class="modern-input shadow-inner w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Education Required <span class="text-rose-400">*</span></label>
+                            <input type="text" name="educationRequirement" th:value="${job.educationRequirement}" required class="modern-input shadow-inner w-full text-sm">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modern-card p-6 sm:p-10 border-t-4 border-t-accent">
+                <h5 class="text-xl font-extrabold flex items-center gap-3 mb-8 border-b border-white/[0.08] pb-4 text-foreground">
+                    <i class="bi bi-cpu-fill text-accent"></i> Skills &amp; Description
+                </h5>
+
+                <div class="space-y-8">
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Required Skills <span class="text-rose-400">*</span></label>
+                        <textarea name="requiredSkills" rows="3" required class="modern-input shadow-inner w-full min-h-[80px] font-mono text-sm resize-y" th:text="${job.requiredSkills}"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Preferred Skills (Nice to have)</label>
+                        <textarea name="preferredSkills" rows="2" class="modern-input shadow-inner w-full min-h-[60px] font-mono text-sm text-foreground-subtle resize-y" th:text="${job.preferredSkills}"></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/[0.08]">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Description <span class="text-rose-400">*</span></label>
+                        <textarea name="description" rows="10" required class="modern-input shadow-inner w-full min-h-[200px] text-sm leading-relaxed resize-y" th:text="${job.description}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 items-center justify-end">
+                <a href="/jobs/manage" class="px-8 py-4 rounded-full font-bold text-foreground-muted shrink-0 w-full sm:w-auto text-center hover:bg-white/[0.08] transition-colors">Cancel</a>
+                <button type="submit" class="modern-btn modern-btn-primary w-full sm:w-auto text-lg px-10">
+                    <i class="bi bi-save mr-2"></i> Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </main>
+</body>
+</html>

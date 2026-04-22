@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post New Job - AI Recruitment</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <div class="flex items-center gap-4 mb-4">
+            <a href="/jobs/manage" class="w-12 h-12 rounded-full bg-white text-foreground-muted flex items-center justify-center shadow-modern-button hover:text-accent hover:shadow-modern-buttonHover hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight">Post New Job</h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm mt-1">Fill out the job details below</p>
+            </div>
+        </div>
+
+        <form th:action="@{/jobs/create}" method="post" class="space-y-8">
+            
+            <div class="modern-card p-6 sm:p-10 border-t-4 border-t-indigo-500">
+                <h5 class="text-xl font-extrabold flex items-center gap-3 mb-8 border-b border-white/[0.08] pb-4">
+                    <i class="bi bi-info-circle-fill text-accent"></i> Job Details
+                </h5>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Title <span class="text-rose-400">*</span></label>
+                        <input type="text" name="title" required placeholder="e.g. Senior Software Engineer" class="modern-input shadow-inner w-full text-lg font-bold">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Department <span class="text-rose-400">*</span></label>
+                        <select name="department" required class="modern-input shadow-inner w-full appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:24px] bg-[right:12px_center] bg-no-repeat">
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Operations">Operations</option>
+                            <option value="IT">IT</option>
+                            <option value="Customer Service">Customer Service</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Location <span class="text-rose-400">*</span></label>
+                        <input type="text" name="location" required placeholder="e.g. Hybrid, Remote, NA East" class="modern-input shadow-inner w-full">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Type <span class="text-rose-400">*</span></label>
+                        <select name="jobType" required class="modern-input shadow-inner w-full appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:24px] bg-[right:12px_center] bg-no-repeat">
+                            <option value="">Select Job Type</option>
+                            <option th:each="type : ${jobTypes}" th:value="${type.name()}" th:text="${type.displayName}"></option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-foreground tracking-widest uppercase mb-2 ml-2 text-center">Vacancies <span class="text-rose-400">*</span></label>
+                            <input type="number" name="vacancies" required min="1" max="100" value="1" class="modern-input shadow-inner w-full text-center font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-foreground tracking-widest uppercase mb-2 ml-2 text-center">Expiry Date</label>
+                            <input type="datetime-local" name="expiryDateStr" class="modern-input shadow-inner w-full text-xs text-center px-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value & Rules -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Comp -->
+                <div class="modern-card p-6 sm:p-8 flex flex-col bg-emerald-500/10">
+                    <h5 class="text-lg font-extrabold flex items-center gap-3 mb-6 border-b border-emerald-500/20 pb-4 text-emerald-400">
+                        <i class="bi bi-currency-dollar text-emerald-400"></i> Salary Range
+                    </h5>
+                    
+                    <div class="flex flex-col gap-6 flex-1 justify-center">
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-400/70 tracking-widest uppercase mb-2 ml-2">Min Value ($)</label>
+                            <input type="number" name="minSalary" min="0" step="1000" placeholder="e.g. 50000" class="modern-input shadow-inner w-full font-mono text-emerald-400 bg-white/[0.05] border-emerald-500/30">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-400/70 tracking-widest uppercase mb-2 ml-2">Max Value ($)</label>
+                            <input type="number" name="maxSalary" min="0" step="1000" placeholder="e.g. 80000" class="modern-input shadow-inner w-full font-mono text-emerald-400 bg-white/[0.05] border-emerald-500/30">
+                        </div>
+                        <p class="text-xs font-medium text-emerald-400/60 mt-2 italic">* Leave blank if confidential</p>
+                    </div>
+                </div>
+
+                <!-- Reqs -->
+                <div class="modern-card p-6 sm:p-8 flex flex-col border-t-4 border-t-amber-400">
+                    <h5 class="text-lg font-extrabold flex items-center gap-3 mb-6 border-b border-white/[0.08] pb-4 text-foreground">
+                        <i class="bi bi-card-checklist text-amber-400"></i> Requirements
+                    </h5>
+                    
+                    <div class="flex flex-col gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Experience Required <span class="text-rose-400">*</span></label>
+                            <input type="text" name="experienceRequired" required placeholder="e.g. 3-5 Years" class="modern-input shadow-inner w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Education Required <span class="text-rose-400">*</span></label>
+                            <input type="text" name="educationRequirement" required placeholder="e.g. Bachelor's Degree" class="modern-input shadow-inner w-full text-sm">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modern-card p-6 sm:p-10 border-t-4 border-t-indigo-500">
+                <h5 class="text-xl font-extrabold flex items-center gap-3 mb-8 border-b border-white/[0.08] pb-4 text-indigo-400">
+                    <i class="bi bi-cpu-fill text-accent"></i> Skill Requirements
+                </h5>
+                
+                <div class="space-y-8">
+                    <div class="bg-accent/10 border border-indigo-500/30 rounded-2xl p-5 mb-2">
+                        <p class="text-sm font-bold text-accent-bright mb-1"><i class="bi bi-exclamation-triangle-fill mr-1 text-amber-400"></i> AI Matching Tip</p>
+                        <p class="text-xs font-medium text-accent">The 'Required Skills' field is critical for the AI matching engine. Please list exact skills separated by commas.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Required Skills <span class="text-rose-400">*</span></label>
+                        <textarea name="requiredSkills" rows="3" required placeholder="Comma isolated arrays (e.g. Java, Python, GCP)" class="modern-input shadow-inner w-full min-h-[80px] font-mono text-sm resize-y"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Preferred Skills</label>
+                        <textarea name="preferredSkills" rows="2" placeholder="Comma isolated arrays" class="modern-input shadow-inner w-full min-h-[60px] font-mono text-sm text-foreground-subtle resize-y"></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/[0.08]">
+                        <label class="block text-xs font-bold text-foreground tracking-widest uppercase mb-2 ml-2">Job Description <span class="text-rose-400">*</span></label>
+                        <textarea name="description" rows="10" required placeholder="Enter the full job description here..." class="modern-input shadow-inner w-full min-h-[200px] text-sm leading-relaxed resize-y"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/[0.1] items-center justify-end">
+                <a href="/jobs/manage" class="px-8 py-4 rounded-full font-bold text-foreground-muted shrink-0 w-full sm:w-auto text-center hover:bg-white/[0.08] transition-colors">Cancel</a>
+                <button type="submit" class="modern-btn modern-btn-success w-full sm:w-auto text-lg px-10 shadow-emerald-500/30">
+                    <i class="bi bi-database-add mr-2"></i> Post Job
+                </button>
+            </div>
+
+        </form>
+
+    </main>
+</body>
+</html>

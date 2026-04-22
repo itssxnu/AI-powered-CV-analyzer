@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recruitment - Welcome</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body>
+
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+    <!-- Global Navigation -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-20 lg:py-32 relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-120px)] text-center">
+        
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface border border-white/[0.08] shadow-sm mb-8">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></span>
+            <span class="text-[11px] font-semibold uppercase tracking-widest text-foreground-subtle">System Active & Ready</span>
+        </div>
+
+        <h1 class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tighter mb-6 leading-[1.1] modern-text-gradient">
+            Hire 10x Faster with <br>
+            <span class="modern-text-gradient-accent">Artificial Intelligence</span>
+        </h1>
+        
+        <p class="text-xl sm:text-2xl text-foreground-muted max-w-2xl mb-12 leading-relaxed font-light">
+            The next generation recruitment platform. Automatically parse resumes, match candidate skills, and audit biases—all seamlessly built in.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+            <a th:href="@{/auth/register}" class="modern-btn modern-btn-primary px-8 h-14 text-base w-full sm:w-auto flex items-center gap-2">
+                Get Started Free <i class="bi bi-arrow-right"></i>
+            </a>
+            <a th:href="@{/auth/login}" class="modern-btn modern-btn-secondary px-8 h-14 text-base w-full sm:w-auto">
+                Log In to Account
+            </a>
+        </div>
+
+        <!-- Floating UI Elements Deco -->
+        <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+            <div class="modern-card p-8 flex flex-col items-center text-center opacity-80 hover:opacity-100 hover:-translate-y-2 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-surface border border-white/10 text-foreground-subtle flex items-center justify-center text-xl mb-5 shadow-inner group-hover:text-accent-bright transition-colors"><i class="bi bi-robot"></i></div>
+                <h3 class="font-medium text-lg mb-2 text-foreground">ML Resume Parsing</h3>
+                <p class="text-sm text-foreground-muted leading-relaxed">Extracts skills, experience, and education instantly.</p>
+            </div>
+            <div class="modern-card p-8 flex flex-col items-center text-center opacity-80 hover:opacity-100 hover:-translate-y-2 transition-all transform md:translate-y-4">
+                <div class="w-12 h-12 rounded-xl bg-surface border border-white/10 text-foreground-subtle flex items-center justify-center text-xl mb-5 shadow-inner group-hover:text-emerald-400 transition-colors"><i class="bi bi-graph-up-arrow"></i></div>
+                <h3 class="font-medium text-lg mb-2 text-foreground">Automated Matching</h3>
+                <p class="text-sm text-foreground-muted leading-relaxed">Scores candidates against job descriptions natively.</p>
+            </div>
+            <div class="modern-card p-8 flex flex-col items-center text-center opacity-80 hover:opacity-100 hover:-translate-y-2 transition-all">
+                <div class="w-12 h-12 rounded-xl bg-surface border border-white/10 text-foreground-subtle flex items-center justify-center text-xl mb-5 shadow-inner group-hover:text-pink-400 transition-colors"><i class="bi bi-shield-check"></i></div>
+                <h3 class="font-medium text-lg mb-2 text-foreground">Fairness & Bias Audit</h3>
+                <p class="text-sm text-foreground-muted leading-relaxed">Ensures diverse and equitable candidate pipelines.</p>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

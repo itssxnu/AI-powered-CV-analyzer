@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Management Status</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                    <i class="bi bi-cpu text-sky-500"></i> AI Processing Status
+                </h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                    Candidate Resume ML Processing
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a th:href="@{/admin/dashboard}" class="px-4 py-2 rounded-xl bg-surface border border-white/[0.08] text-foreground-muted font-bold hover:bg-white/[0.04] hover:text-accent transition-colors shadow-sm flex items-center gap-2">
+                    <i class="bi bi-arrow-left"></i> Return to Admin
+                </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 border border-emerald-200 text-emerald-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-check-circle-fill text-xl text-emerald-400"></i> <span th:text="${message}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 border border-rose-200 text-rose-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-xl text-rose-400"></i> <span th:text="${error}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Telemetry Horizon -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            
+            <div class="modern-card p-6 bg-gradient-to-br from-amber-500/10 to-amber-600/10 border border-amber-500/20 text-foreground relative overflow-hidden group">
+                <i class="bi bi-hourglass-split absolute -right-6 -bottom-6 text-amber-500/20 text-8xl group-hover:scale-110 group-hover:text-amber-500/30 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-amber-300 mb-1">Queue Pipeline</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${unprocessedCandidates.size()}">0</h3>
+                    <p class="text-sm font-medium text-amber-100 flex items-center gap-2"><i class="bi bi-person-exclamation"></i> Unprocessed Candidates</p>
+                </div>
+            </div>
+
+            <div class="modern-card p-6 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border border-emerald-500/20 text-foreground relative overflow-hidden group">
+                <i class="bi bi-cpu-fill absolute -right-6 -bottom-6 text-emerald-500/20 text-8xl group-hover:scale-110 group-hover:text-emerald-500/30 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-300 mb-1">Processing Complete</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${processedCandidates.size()}">0</h3>
+                    <p class="text-sm font-medium text-emerald-100 flex items-center gap-2"><i class="bi bi-check2-all"></i> Processed Candidates</p>
+                </div>
+            </div>
+
+            <div class="modern-card p-6 bg-gradient-to-br from-sky-500/10 to-indigo-600/10 border border-indigo-500/20 text-foreground relative overflow-hidden group">
+                <i class="bi bi-diagram-3-fill absolute -right-6 -bottom-6 text-sky-500/20 text-8xl group-hover:scale-110 group-hover:text-sky-500/30 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-sky-300 mb-1">Total Candidate Volume</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${unprocessedCandidates.size() + processedCandidates.size()}">0</h3>
+                    <p class="text-sm font-medium text-sky-100 flex items-center gap-2"><i class="bi bi-people"></i> Total Candidates</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+
+            <!-- Pending Task Queue -->
+            <div class="lg:col-span-4 space-y-4">
+                <h4 class="text-sm font-black text-amber-400 uppercase tracking-widest flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="bi bi-hourglass-top"></i> Execution Queue
+                </h4>
+
+                <div th:if="${unprocessedCandidates.isEmpty()}" class="modern-card p-10 text-center border-dashed border-emerald-500/30 bg-emerald-500/10">
+                    <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-4 scale-110 shadow-inner">
+                        <i class="bi bi-check-lg text-3xl font-black"></i>
+                    </div>
+                    <h3 class="font-black text-emerald-400 text-xl mb-1">Queue Empty</h3>
+                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-400/80">No candidates pending</p>
+                </div>
+
+                <div th:unless="${unprocessedCandidates.isEmpty()}" class="space-y-3">
+                    <!-- Queue Items -->
+                    <div th:each="candidate : ${unprocessedCandidates}" class="modern-card p-4 border border-white/[0.08] bg-surface hover:border-amber-300 hover:shadow-md transition-all group">
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <h6 class="font-black text-foreground group-hover:text-amber-400 transition-colors" th:text="${candidate.fullName}">John Doe</h6>
+                                <p class="text-xs font-mono text-foreground-subtle mb-2" th:text="${candidate.email}">email@example.com</p>
+                                
+                                <div th:if="${candidate.skills != null and !candidate.skills.isEmpty()}" class="flex flex-wrap gap-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-widest bg-white/[0.04] text-foreground-muted px-1.5 py-0.5 rounded border border-white/[0.08]" th:text="${#strings.abbreviate(candidate.skills, 30)}">Skills</span>
+                                </div>
+                                <span th:unless="${candidate.skills != null and !candidate.skills.isEmpty()}" class="text-[9px] font-black uppercase tracking-widest text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 inline-block">No Skills Detected</span>
+                            </div>
+                            
+                            <form th:action="@{/admin/ai/process/{userId}(userId=${candidate.id})}" method="post" class="shrink-0">
+                                <button type="submit" class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all shadow-sm group-hover:scale-105" title="Run ML Process">
+                                    <i class="bi bi-cpu"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processed Data Matrix -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                
+                <h4 class="text-sm font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-xl shadow-sm shrink-0">
+                    <i class="bi bi-check-all"></i> Processed Log
+                </h4>
+
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-sm flex-1">
+                    
+                    <div th:if="${processedCandidates.isEmpty()}" class="p-16 text-center text-foreground-subtle">
+                        <i class="bi bi-hdd-network text-6xl mb-4 opacity-50 block"></i>
+                        <h4 class="font-black text-foreground-muted">No Candidates Processed</h4>
+                        <p class="text-sm">Initiate processing from the Execution Queue to parse applicant data.</p>
+                    </div>
+
+                    <div th:unless="${processedCandidates.isEmpty()}" class="overflow-x-auto bg-transparent">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-white/[0.02] border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-foreground-subtle">
+                                    <th class="p-4 px-6">Candidate</th>
+                                    <th class="p-4">Resume Parsing</th>
+                                    <th class="p-4">Structured Data</th>
+                                    <th class="p-4 text-right px-6">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm font-medium text-foreground-muted bg-transparent">
+                                <tr th:each="candidate : ${processedCandidates}" class="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors group">
+                                    
+                                    <td class="p-4 px-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                                                <i class="bi bi-person text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <span class="font-black text-foreground block mb-0.5 text-sm group-hover:text-accent transition-colors" th:text="${candidate.fullName}">John Doe</span>
+                                                <span class="text-[10px] font-mono text-foreground-subtle block" th:text="${candidate.email}">email@example.com</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="p-4">
+                                        <div th:if="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="flex items-center gap-2">
+                                            <div class="w-2 h-2 rounded-full bg-emerald-500 text-emerald-400"></div>
+                                            <span class="font-black text-emerald-400">Processed</span>
+                                        </div>
+                                        <div th:unless="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="flex items-center gap-2">
+                                            <div class="w-2 h-2 rounded-full bg-amber-500 text-amber-400"></div>
+                                            <span class="font-black text-amber-400">Pending</span>
+                                        </div>
+                                        <div th:if="${candidate.currentResume != null and candidate.currentResume.mlProcessed}" class="text-[9px] font-bold uppercase tracking-widest text-foreground-subtle mt-1">
+                                            AI Confidence: <span th:text="${#numbers.formatDecimal(candidate.currentResume.mlConfidence * 100, 1, 0)} + '%'">0%</span>
+                                        </div>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[10px] font-bold tracking-widest uppercase bg-surface border border-white/[0.08] px-1.5 py-0.5 rounded w-max text-foreground-muted" th:text="${#strings.abbreviate(candidate.skills, 20)}">Skills</span>
+                                            <span class="text-[10px] font-black tracking-widest text-foreground-subtle" th:text="${candidate.experienceYears != null ? candidate.experienceYears + ' YRS EXP' : '0 YRS EXP'}">0 YRS EXP</span>
+                                        </div>
+                                    </td>
+
+                                    <td class="p-4 px-6 text-right">
+                                        <div class="text-xs font-mono font-bold text-foreground-subtle" th:text="${#temporals.format(candidate.updatedAt, 'HH:mm:ss')}">00:00:00</div>
+                                        <div class="text-[9px] font-bold uppercase tracking-widest text-foreground-subtle mt-1" th:text="${#temporals.format(candidate.updatedAt, 'yyyy-MM-dd')}">2026-01-01</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== BIAS / FAIRNESS AUDIT SECTION ===== -->
+        <div class="space-y-6 pt-4">
+
+            <!-- Section Header + Trigger Button -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-indigo-700 rounded-[28px] p-7 text-white relative overflow-hidden shadow-modern-card">
+                <div class="absolute -right-8 -bottom-8 text-violet-400/20 text-[10rem] pointer-events-none"><i class="bi bi-shield-check"></i></div>
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-black font-heading flex items-center gap-3 mb-1">
+                        <i class="bi bi-shield-shaded"></i> AI Fairness & Bias Audit
+                    </h2>
+                    <p class="text-violet-200 text-sm font-medium max-w-xl">
+                        Runs 16 synthetic CV clones — identical skills, mutated demographics (gender, age, ethnicity, religion, disability, etc.) — through the AI ranker to detect statistical bias.
+                    </p>
+                </div>
+                <a th:href="@{/admin/ai/fairness-audit}" 
+                   class="relative z-10 shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl bg-white text-accent-bright font-black text-sm shadow-modern-button hover:-translate-y-1 hover:shadow-modern-buttonHover transition-all uppercase tracking-widest">
+                    <i class="bi bi-play-circle-fill text-lg"></i> Run Audit
+                </a>
+            </div>
+
+            <!-- Results (shown only when audit ran) -->
+            <div th:if="${auditRan}" class="modern-card p-0 overflow-hidden border border-white/[0.08]">
+
+                <!-- Verdict Banner -->
+                <div th:if="${auditResult.status == 'PASSED'}"
+                     class="flex items-center gap-4 p-5 bg-emerald-500/10 border-b border-emerald-200">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl shadow-sm">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-emerald-400 text-lg">AUDIT PASSED — No Statistical Bias Detected</h3>
+                        <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">All 16 demographic variants scored within ±0.1 of the baseline</p>
+                    </div>
+                </div>
+                <div th:unless="${auditResult.status == 'PASSED'}"
+                     class="flex items-center gap-4 p-5 bg-rose-500/10 border-b border-rose-200">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-2xl shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-rose-400 text-lg">AUDIT FAILED — Potential Bias Detected</h3>
+                        <p class="text-rose-400 text-xs font-bold uppercase tracking-widest">
+                            Flagged: <span th:text="${auditResult.failures}"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="overflow-x-auto bg-transparent">
+                    <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
+                        <thead>
+                            <tr class="bg-white/[0.02] border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-foreground-subtle">
+                                <th class="p-4 px-6">Characteristic Variant</th>
+                                <th class="p-4">Score</th>
+                                <th class="p-4">Δ vs Baseline</th>
+                                <th class="p-4">Verdict</th>
+                            </tr>
+                        </thead>
+                        <tbody th:if="${auditResult.details != null}" class="divide-y divide-white/[0.04] font-medium text-foreground-muted bg-transparent">
+                            <tr th:each="entry : ${auditResult.details}" class="hover:bg-white/[0.04] transition-colors">
+                                <td class="p-4 px-6">
+                                    <div class="flex items-center gap-2">
+                                        <span th:if="${entry.key == 'Baseline'}" class="w-2 h-2 rounded-full bg-indigo-400 shrink-0"></span>
+                                        <span th:unless="${entry.key == 'Baseline'}" class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
+                                        <span class="font-bold text-foreground" th:text="${entry.key}"></span>
+                                    </div>
+                                </td>
+                                <td class="p-4">
+                                    <span th:if="${entry.value.score != null}"
+                                          class="font-black font-mono"
+                                          th:text="${#numbers.formatDecimal(entry.value.score, 1, 3)}">—</span>
+                                    <span th:unless="${entry.value.score != null}" class="text-foreground-subtle text-xs">Error</span>
+                                </td>
+                                <td class="p-4">
+                                    <span th:if="${entry.value.diff_from_baseline != null}"
+                                          th:text="${(entry.value.diff_from_baseline > 0 ? '+' : '') + #numbers.formatDecimal(entry.value.diff_from_baseline, 1, 3)}"
+                                          th:classappend="${entry.value.diff_from_baseline > 0.01} ? 'text-emerald-400' : (${entry.value.diff_from_baseline < -0.01} ? 'text-rose-400' : 'text-foreground-subtle')"
+                                          class="font-mono font-bold text-xs">—</span>
+                                    <span th:unless="${entry.value.diff_from_baseline != null}" class="text-foreground-subtle text-xs">—</span>
+                                </td>
+                                <td class="p-4">
+                                    <span th:if="${entry.value.status == 'FAIR'}"
+                                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 border border-emerald-200">
+                                        <i class="bi bi-check-circle-fill"></i> FAIR
+                                    </span>
+                                    <span th:if="${entry.value.status == 'BIAS DETECTED'}"
+                                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-rose-500/20 border border-rose-500/30 text-rose-400 border border-rose-200">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> BIAS
+                                    </span>
+                                    <span th:if="${entry.key == 'Baseline'}"
+                                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-accent/20 border border-accent/20 text-accent border border-indigo-200">
+                                        <i class="bi bi-circle-half"></i> BASELINE
+                                    </span>
+                                    <span th:if="${entry.value.error != null}"
+                                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-surface text-foreground-subtle border border-white/[0.08]">
+                                        ERROR
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer note -->
+                <div class="p-4 px-6 bg-white/[0.02] border-t border-white/[0.08] text-[10px] font-bold uppercase tracking-widest text-foreground-subtle flex items-center gap-2">
+                    <i class="bi bi-info-circle"></i>
+                    Bias threshold: score deviation &gt; ±0.1 from baseline triggers a BIAS flag. All CVs have identical skills and qualifications.
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

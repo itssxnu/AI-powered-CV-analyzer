@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Admin Overview</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                    <i class="bi bi-people-fill text-accent"></i> Manage Users
+                </h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                    System Users Overview
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a th:href="@{/admin/users/new}" class="modern-btn modern-btn-primary flex items-center gap-2 font-black">
+                    <i class="bi bi-person-plus-fill"></i> Add User
+                </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30/80 border border-emerald-200 text-emerald-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-check-circle-fill text-xl text-emerald-400"></i> <span th:text="${message}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30/80 border border-rose-200 text-rose-400 px-4 py-3 rounded-2xl shadow-sm inline-flex items-center justify-between gap-4 font-bold text-sm w-full backdrop-blur-sm">
+            <span class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-xl text-rose-400"></i> <span th:text="${error}"></span></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Filter Array -->
+        <div class="modern-card p-6 border border-white/[0.08] bg-transparent backdrop-blur-md">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div class="md:col-span-3">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Access Role Override</label>
+                    <select name="role" class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-foreground-muted font-bold focus:outline-none focus:border-accent focus:bg-white/[0.04] transition-colors" onchange="this.form.submit()">
+                        <option value="">All Architectures</option>
+                        <option value="CANDIDATE" th:selected="${selectedRole == 'CANDIDATE'}">Candidate Base</option>
+                        <option value="HR" th:selected="${selectedRole == 'HR'}">HR Operators</option>
+                        <option value="ADMIN" th:selected="${selectedRole == 'ADMIN'}">System Admin</option>
+                    </select>
+                </div>
+                
+                <div class="md:col-span-7">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-foreground-subtle mb-2">Metadata Search</label>
+                    <div class="relative">
+                        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-foreground-subtle"></i>
+                        <input type="text" name="search" th:value="${search}" placeholder="Query by string, identifier, or tech stack..." class="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-sm text-foreground-muted font-medium placeholder-slate-500 focus:outline-none focus:border-accent focus:bg-white/[0.04] transition-colors">
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 flex gap-2 h-full">
+                    <button type="submit" class="modern-btn modern-btn-primary w-full h-[46px] mt-auto">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                    <a th:href="@{/admin/users}" class="modern-btn modern-btn-secondary w-full h-[46px] mt-auto flex items-center justify-center">
+                        <i class="bi bi-arrow-clockwise text-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Directory Table -->
+        <div class="modern-card p-0 border border-white/[0.08] bg-transparent overflow-hidden shadow-md">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-foreground-subtle">
+                            <th class="p-4 px-6 w-16">ID</th>
+                            <th class="p-4">User Details</th>
+                            <th class="p-4">Email Address</th>
+                            <th class="p-4">User Role</th>
+                            <th class="p-4">Assigned Skills</th>
+                            <th class="p-4">AI Status</th>
+                            <th class="p-4">State</th>
+                            <th class="p-4 text-right px-6">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm font-medium text-foreground-muted">
+                        <tr th:each="user : ${users}" th:classappend="${user.currentResume != null and user.currentResume.mlProcessed} ? 'bg-emerald-500/10' : ''" class="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors group">
+                            <td class="p-4 px-6 font-mono text-xs text-foreground-subtle" th:text="'#' + ${user.id}">#1</td>
+                            <td class="p-4">
+                                <span class="font-black text-foreground block mb-0.5" th:text="${user.firstName + ' ' + user.lastName}">John Doe</span>
+                                <span class="text-[10px] text-accent font-bold tracking-widest uppercase bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20" th:text="'@' + ${user.username}">@username</span>
+                            </td>
+                            <td class="p-4 font-mono text-xs text-foreground-subtle" th:text="${user.email}">email@example.com</td>
+                            <td class="p-4">
+                                <!-- Role Dropdown via form submission immediately on change -->
+                                <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="m-0">
+                                    <select name="role" class="bg-white/[0.02] border border-white/[0.08] text-xs font-bold text-foreground-muted rounded p-1 w-32 focus:border-accent focus:outline-none focus:bg-white/[0.04]" onchange="this.form.submit()">
+                                        <option value="CANDIDATE" th:selected="${user.role.name() == 'CANDIDATE'}">Basic</option>
+                                        <option value="HR" th:selected="${user.role.name() == 'HR'}">Operator</option>
+                                        <option value="ADMIN" th:selected="${user.role.name() == 'ADMIN'}">Root</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="p-4">
+                                <div th:if="${user.skills != null and !user.skills.isEmpty()}" class="flex flex-wrap gap-1 max-w-[200px]">
+                                    <span class="bg-surface text-foreground-subtle border border-white/[0.08] text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded" th:text="${#strings.abbreviate(user.skills, 30)}">Java, SQL...</span>
+                                </div>
+                                <span th:unless="${user.skills != null and !user.skills.isEmpty()}" class="text-[10px] text-foreground-subtle/50 font-black tracking-widest uppercase">NULL</span>
+                            </td>
+                            <td class="p-4">
+                                <div th:if="${user.currentResume != null and user.currentResume.mlProcessed}" class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm">
+                                    <i class="bi bi-cpu-fill text-emerald-400"></i> Synced
+                                    <span th:if="${user.currentResume.mlProcessed}" class="opacity-70 font-mono text-xs">(AI ✓)</span>
+                                </div>
+                                <div th:unless="${user.currentResume != null and user.currentResume.mlProcessed}" class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm">
+                                    <i class="bi bi-clock-fill text-amber-400"></i> Wait State
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex h-2.5 w-2.5">
+                                        <span th:if="${user.active}" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span th:if="${user.active}" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                        <span th:unless="${user.active}" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                                    </div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest" th:classappend="${user.active ? 'text-emerald-400' : 'text-rose-400'}" th:text="${user.active ? 'LIVE' : 'HALTED'}"></span>
+                                </div>
+                            </td>
+                            <td class="p-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center hover:bg-accent-bright hover:text-white transition-colors border border-accent/20 shadow-sm" title="Edit User">
+                                        <i class="bi bi-pencil-fill text-xs"></i>
+                                    </a>
+
+                                    <button th:if="${user.active}" class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-colors border border-amber-500/20 shadow-sm action-deactivate" th:data-id="${user.id}" title="Deactivate User">
+                                        <i class="bi bi-pause-fill text-xs font-black"></i>
+                                    </button>
+
+                                    <button th:unless="${user.active}" class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/20 shadow-sm action-activate" th:data-id="${user.id}" title="Activate User">
+                                        <i class="bi bi-play-fill text-xs font-black"></i>
+                                    </button>
+
+                                    <button class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-colors border border-rose-500/20 shadow-sm action-delete" th:data-id="${user.id}" th:data-name="${user.fullName}" title="Delete User">
+                                        <i class="bi bi-trash-fill text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr th:if="${users.empty}">
+                            <td colspan="8" class="p-8 text-center text-foreground-subtle">
+                                <div class="inline-flex flex-col items-center">
+                                    <i class="bi bi-clipboard-x text-4xl mb-2 text-foreground-subtle/50"></i>
+                                    <span class="font-bold text-sm">No Users Found</span>
+                                    <p class="text-xs text-foreground-subtle/70 mt-1">Your search query yielded 0 results.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Essential Javascript for Async Actions -->
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            function sendPostRequest(url, token, header) {
+                let headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
+                if (token && header) {
+                    headers[header] = token;
+                }
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        response.text().then(text => alert('Error: ' + (text || 'Engine error occurred')));
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred bridging payload: ' + error.message);
+                });
+            }
+
+            document.querySelectorAll('.action-deactivate').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to deactivate this user?')) {
+                        sendPostRequest('/admin/users/' + this.getAttribute('data-id') + '/deactivate', csrfToken, csrfHeader);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.action-activate').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to activate this user?')) {
+                        sendPostRequest('/admin/users/' + this.getAttribute('data-id') + '/activate', csrfToken, csrfHeader);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.action-delete').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm(`Are you sure you want to permanently delete user [${this.getAttribute('data-name')}]?`)) {
+                        sendPostRequest('/admin/users/' + this.getAttribute('data-id') + '/delete', csrfToken, csrfHeader);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

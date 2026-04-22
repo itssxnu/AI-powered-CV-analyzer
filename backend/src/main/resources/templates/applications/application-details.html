@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Application - ' + ${candidate.fullName}">Application Details</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+    </div>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-6">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-2">
+            <div class="flex items-center gap-4">
+                <a th:href="@{/applications/job/{id}(id=${job.id})}" class="w-12 h-12 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center hover:text-accent-bright hover:bg-white/[0.04] transition-all shadow-sm">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-black font-heading tracking-tight flex items-center gap-3">
+                        <i class="bi bi-file-earmark-person-fill text-accent-bright"></i> Application Details
+                    </h1>
+                    <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm mt-1">
+                        Candidate: <span class="text-foreground" th:text="${candidate.fullName}"></span>
+                        <span class="mx-2 text-foreground-subtle/30">|</span>
+                        Job: <span class="text-accent" th:text="${job.title}"></span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <a th:href="@{/applications/{id}/resume/view(id=${application.id})}" target="_blank" class="modern-btn modern-btn-primary shadow-indigo-500/30 font-black">
+                    <i class="bi bi-file-earmark-pdf-fill mr-2"></i> View Resume
+                </a>
+                <a sec:authorize="hasAnyRole('HR', 'ADMIN')" th:href="@{/applications/{id}/resume/download(id=${application.id})}" class="modern-btn modern-btn-secondary border-emerald-500/30 text-emerald-400 font-bold">
+                    <i class="bi bi-download mr-2"></i> Download
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${message}" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-4 rounded-xl flex items-center shadow-sm">
+            <div class="flex items-center gap-3"><i class="bi bi-check-circle-fill"></i> <span th:text="${message}" class="font-bold"></span></div>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-6 py-4 rounded-xl flex items-center shadow-sm">
+            <div class="flex items-center gap-3"><i class="bi bi-exclamation-octagon-fill"></i> <span th:text="${error}" class="font-bold"></span></div>
+        </div>
+
+        <!-- Master Status Banner (HR/ADMIN ONLY) -->
+        <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="modern-card p-4 sm:p-6 bg-surface border border-white/[0.08] shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+            <div class="flex items-center gap-6 relative z-10 w-full md:w-auto">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-1">Current Status</span>
+                    <span class="text-xl font-black uppercase tracking-widest px-4 py-1.5 rounded-xl border inline-flex items-center gap-2"
+                        th:classappend="${application.status?.name() == 'PENDING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : (application.status?.name() == 'SHORTLISTED' ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' : (application.status?.name() == 'INTERVIEW_SCHEDULED' ? 'bg-accent/10 text-accent-bright border-accent/20' : (application.status?.name() == 'REJECTED' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : (application.status != null ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-surface text-foreground-muted border-white/[0.08]'))))}">
+                        <span th:text="${application.status != null ? application.status.displayName : 'Unknown'}">Pending</span>
+                    </span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto relative z-10">
+                <select id="statusSelect" class="modern-input bg-background-base text-foreground font-bold tracking-wide border-white/[0.08] text-sm md:w-48 py-3">
+                    <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.displayName}" th:selected="${application.status != null and application.status.name() == s.name()}"></option>
+                </select>
+                <button onclick="updateStatus()" class="px-6 py-3 rounded-[14px] bg-white/[0.04] border border-white/[0.08] hover:bg-accent text-foreground transition-all font-black uppercase tracking-widest text-xs flex items-center shadow-sm">
+                    <i class="bi bi-check2-all mr-2 text-lg"></i> Update
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- COLUMN 1: Profile & Metadata -->
+            <div class="space-y-6">
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden">
+                    <div class="p-6 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-person-bounding-box text-accent-bright text-xl"></i>
+                        <h3 class="font-black">Candidate Profile</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-col items-center mb-6">
+                            <h4 class="text-2xl font-black text-foreground mb-1" th:text="${candidate.fullName}">John Doe</h4>
+                            <p class="text-foreground-subtle font-medium flex items-center gap-2"><i class="bi bi-envelope"></i> <span th:text="${candidate.email}"></span></p>
+                        </div>
+                        <div class="space-y-4 font-medium text-sm">
+                            <div class="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                                <span class="text-foreground-muted">Experience</span>
+                                <span class="text-foreground font-bold" th:text="${candidate.experienceYears != null ? candidate.experienceYears + ' years' : 'Not specified'}"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                                <span class="text-foreground-muted">Education</span>
+                                <span class="text-foreground font-bold" th:text="${candidate.education != null ? candidate.education : 'Not specified'}"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-white/[0.04]">
+                                <span class="text-foreground-muted">Current Role</span>
+                                <span class="text-accent-bright font-bold" th:text="${application.currentPosition != null ? application.currentPosition : 'Not specified'}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden">
+                    <div class="p-4 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-info-square text-sky-400"></i>
+                        <h5 class="font-black text-sm uppercase tracking-widest">Metadata</h5>
+                    </div>
+                    <div class="p-5 space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-foreground-muted">Expected Salary</span>
+                            <span class="text-foreground font-bold text-emerald-400">$<span th:text="${application.expectedSalary}"></span></span>
+                        </div>
+                        <div class="flex justify-between border-t border-white/[0.04] pt-3 mt-3">
+                            <span class="text-foreground-muted">Willing to Relocate</span>
+                            <span th:if="${application.willingToRelocate}" class="text-emerald-400 font-bold">Yes</span>
+                            <span th:unless="${application.willingToRelocate}" class="text-foreground-subtle font-bold">No</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: AI & Interview -->
+            <div class="space-y-6">
+                <!-- AI Engine Card (HR/ADMIN ONLY) -->
+                <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="modern-card p-0 border border-emerald-500/20 bg-surface shadow-sm overflow-hidden">
+                    <div class="p-6 bg-emerald-500/5 border-b border-emerald-500/10 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="bi bi-robot text-emerald-400 text-xl"></i>
+                            <h3 class="font-black m-0">AI Match Analysis</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-col items-center mb-8">
+                            <div class="text-center">
+                                <span class="text-6xl font-black text-foreground" th:text="${application.matchScore != null ? #numbers.formatDecimal(application.matchScore, 1, 0) : '0'}">0</span><span class="text-xl text-foreground-subtle">%</span>
+                            </div>
+                        </div>
+                        <div class="space-y-5">
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-widest text-foreground-subtle">Skills</span>
+                                    <span class="font-black text-emerald-400" th:text="${application.skillsMatchScore != null ? #numbers.formatDecimal(application.skillsMatchScore, 1, 0) + '%' : '0%'}"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-widest text-foreground-subtle">Experience</span>
+                                    <span class="font-black text-amber-500" th:text="${application.experienceMatchScore != null ? #numbers.formatDecimal(application.experienceMatchScore, 1, 0) + '%' : '0%'}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interview Module -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface shadow-sm overflow-hidden">
+                    <div class="p-6 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-calendar-event text-indigo-400 text-xl"></i>
+                        <h3 class="font-black m-0">Interview Module</h3>
+                    </div>
+                    <div class="p-6">
+                        <div th:if="${application.interviewScheduled}">
+                            <div class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-4 py-3 rounded-xl flex items-center gap-3 mb-6">
+                                <span class="font-black uppercase tracking-widest text-xs">Interview Scheduled</span>
+                            </div>
+                            <div class="space-y-4 mb-6">
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-1">Time & Date</p>
+                                <p class="text-foreground font-black" th:text="${#temporals.format(application.interviewDate, 'dd MMM yyyy, HH:mm')}"></p>
+                                <a th:if="${application.interviewLink}" th:href="${application.interviewLink}" target="_blank" class="text-accent font-bold text-xs"><i class="bi bi-link-45deg"></i> Join Meeting</a>
+                            </div>
+                            <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="flex gap-3 pt-4 border-t border-white/[0.08]">
+                                <button class="flex-1 py-2.5 rounded-xl border border-amber-500/30 text-amber-500 font-bold text-xs" onclick="rescheduleInterview()">Reschedule</button>
+                                <button class="flex-1 py-2.5 rounded-xl border border-rose-500/30 text-rose-500 font-bold text-xs" onclick="cancelInterview()">Cancel</button>
+                            </div>
+                        </div>
+                        <div th:unless="${application.interviewScheduled}" class="py-10 text-center">
+                            <h4 class="text-foreground font-black mb-2">No Interview Assigned</h4>
+                            <a sec:authorize="hasAnyRole('HR', 'ADMIN')" th:href="@{/applications/{id}/schedule-interview(id=${application.id})}" class="modern-btn modern-btn-primary px-8">Schedule Now</a>
+                        </div>
+                        
+                        <!-- NEW ADDITION: Show Q&A button for Candidate -->
+                        <div sec:authorize="hasRole('CANDIDATE')" class="mt-4 border-t border-white/[0.08] pt-4">
+                             <a th:href="@{/applications/{id}/interview(id=${application.id})}" class="modern-btn modern-btn-secondary w-full text-center">
+                                <i class="bi bi-question-circle font-bold"></i> View Interview Assessment
+                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: Actions -->
+            <div class="space-y-6">
+                <!-- Strategic Actions Card (HR/ADMIN ONLY) -->
+                <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="modern-card p-0 border border-white/[0.08] bg-surface shadow-sm overflow-hidden">
+                    <div class="p-4 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-lightning-charge-fill text-amber-400"></i>
+                        <h5 class="font-black text-sm uppercase tracking-widest">Strategic Actions</h5>
+                    </div>
+                    <div class="p-6 flex flex-col gap-3">
+                        <button class="w-full py-4 rounded-xl border border-sky-500/30 bg-sky-500/5 text-sky-400 font-black uppercase tracking-widest text-xs" onclick="shortlistCandidate()" th:if="${application.shortlistedDate == null}">Mark as Shortlisted</button>
+                        <button class="w-full py-4 rounded-xl border border-amber-500/30 bg-amber-500/5 text-amber-500 font-black uppercase tracking-widest text-xs" onclick="removeShortlist()" th:if="${application.shortlistedDate != null}">Revoke Shortlist</button>
+                        <a th:href="@{/ranking/details/job-candidate?jobId=${job.id}&candidateId=${candidate.id}}" class="w-full py-4 rounded-xl border border-white/[0.08] bg-background-base text-foreground font-black uppercase tracking-widest text-xs text-center">View Global Ranking</a>
+                        
+                        <form th:action="@{/hr/applications/{id}/recalculate(id=${application.id})}" method="post">
+                            <button type="submit" class="w-full py-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 font-black uppercase tracking-widest text-xs">Recalculate AI Score</button>
+                        </form>
+                        <button class="w-full py-4 rounded-xl border border-rose-500/30 bg-rose-500/5 text-rose-500 font-black uppercase tracking-widest text-xs mt-2" onclick="rejectApplication()" th:if="${application.status?.name() != 'REJECTED' and application.status?.name() != 'HIRED'}">Reject Applicant</button>
+                    </div>
+                </div>
+
+                <!-- Cover Letter Card -->
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface shadow-sm overflow-hidden">
+                    <div class="p-4 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-envelope-open-fill text-foreground-subtle"></i>
+                        <h5 class="font-black text-sm uppercase tracking-widest">Cover Letter</h5>
+                    </div>
+                    <div class="p-5">
+                        <div th:if="${application.coverLetter != null}" class="bg-background-base p-4 rounded-xl border border-white/[0.04] text-sm whitespace-pre-line leading-relaxed"><th:block th:text="${application.coverLetter}"></th:block></div>
+                        <div th:unless="${application.coverLetter != null}" class="py-8 text-center text-foreground-subtle/50 text-sm italic">No cover letter</div>
+                    </div>
+                </div>
+
+                <!-- Internal Notes (HR/ADMIN ONLY) -->
+                <div sec:authorize="hasAnyRole('HR', 'ADMIN')" class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden">
+                    <div class="p-4 bg-white/[0.02] border-b border-white/[0.08] flex items-center gap-3">
+                        <i class="bi bi-sticky-fill text-amber-400"></i>
+                        <h5 class="font-black text-sm uppercase tracking-widest">Internal Notes</h5>
+                    </div>
+                    <div class="p-4 bg-surface border-t border-white/[0.08]">
+                        <form th:action="@{/applications/{id}/notes(id=${application.id})}" method="post" class="space-y-3">
+                            <textarea class="modern-input bg-background-base w-full min-h-[80px] text-sm rounded-xl" name="note" required></textarea>
+                            <select name="noteType" class="modern-input bg-background-base text-xs w-full py-2">
+                                <option value="GENERAL">General Log</option>
+                            </select>
+                            <button type="submit" class="w-full mt-2 modern-btn modern-btn-primary shadow-indigo-500/20 py-2.5 text-xs">Append Note</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS explicitly for HR ONLY features -->
+    <script sec:authorize="hasAnyRole('HR', 'ADMIN')" th:inline="javascript">
+        /*<![CDATA[*/
+        function updateStatus() {
+            const status = document.getElementById('statusSelect').value;
+            submitAction('/status', { 'status': status, 'notify': 'true' });
+        }
+        function shortlistCandidate() {
+            submitAction('/shortlist', { 'candidateIds': [[${candidate.id}]], 'notes': '' }, '/applications/job/' + [[${job.id}]]);
+        }
+        function removeShortlist() {
+            if (confirm('Revoke shortlist?')) submitAction('/shortlist', { 'candidateIds': [[${candidate.id}]], 'shortlist': 'false' }, '/applications/job/' + [[${job.id}]]);
+        }
+        function rescheduleInterview() {
+            const dt = prompt('Enter new date and time (YYYY-MM-DD HH:MM):');
+            if (dt) submitAction('/reschedule-interview', { 'newDateTime': new Date(dt).toISOString(), 'reason': 'Reschedule Request' });
+        }
+        function cancelInterview() {
+            if (confirm('Cancel interview?')) submitAction('/cancel-interview', { 'reason': 'HR Cancellation' });
+        }
+        function rejectApplication() {
+            if (confirm('Definitively reject applicant?')) submitAction('/status', { 'status': 'REJECTED', 'notify': 'true' });
+        }
+
+        function submitAction(endpoint, dataMap, overrideBaseUrl) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = overrideBaseUrl ? (overrideBaseUrl + endpoint) : ('/applications/' + [[${application.id}]] + endpoint);
+            
+            for (const [k, v] of Object.entries(dataMap)) {
+                const i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = v; form.appendChild(i);
+            }
+            
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            if (csrfToken) { const i = document.createElement('input'); i.type = 'hidden'; i.name = '_csrf'; i.value = csrfToken; form.appendChild(i); }
+            
+            document.body.appendChild(form); form.submit();
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

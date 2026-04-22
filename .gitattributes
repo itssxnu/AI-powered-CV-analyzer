@@ -1,0 +1,20 @@
+# Git LFS tracking — large binary model files
+*.pkl filter=lfs diff=lfs merge=lfs -text
+
+# Ensure Unix line endings for shell scripts
+mvnw text eol=lf
+*.sh   text eol=lf
+*.bat  text eol=crlf
+
+# Treat all Java / HTML / CSS as text
+*.java  text
+*.html  text
+*.css   text
+*.js    text
+*.json  text
+*.xml   text
+*.yml   text
+*.yaml  text
+*.md    text
+*.sql   text
+*.py    text

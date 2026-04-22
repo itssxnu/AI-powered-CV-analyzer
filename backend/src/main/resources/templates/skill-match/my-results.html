@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Job Matches - AI Recruitment System</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1280px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-black font-heading tracking-tight mb-2 flex items-center gap-3">
+                    <i class="bi bi-graph-up-arrow text-accent"></i> My Job Matches
+                </h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm">
+                    Your Application Compatibility Scores
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/jobs/browse" class="modern-btn bg-indigo-600 text-white shadow-indigo-500/30 hover:bg-indigo-500 flex items-center gap-2 font-black">
+                    <i class="bi bi-search"></i> Browse Jobs
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Horizon -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            
+            <div class="modern-card p-6 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white relative overflow-hidden group">
+                <i class="bi bi-archive-fill absolute -right-6 -bottom-6 text-indigo-400 text-8xl opacity-30 group-hover:scale-110 group-hover:opacity-50 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-200 mb-1">Total Assessments</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${totalMatches}">0</h3>
+                    <p class="text-sm font-medium text-indigo-100 flex items-center gap-2"><i class="bi bi-diagram-3-fill"></i> Jobs Matched Against</p>
+                </div>
+            </div>
+
+            <div class="modern-card p-6 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white relative overflow-hidden group">
+                <i class="bi bi-trophy-fill absolute -right-6 -bottom-6 text-emerald-300 text-8xl opacity-30 group-hover:scale-110 group-hover:opacity-50 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-200 mb-1">High Compatibility</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${excellentMatches.size()}">0</h3>
+                    <p class="text-sm font-medium text-emerald-100 flex items-center gap-2"><i class="bi bi-check-all"></i> Excellent Matches</p>
+                </div>
+            </div>
+
+            <div class="modern-card p-6 bg-gradient-to-br from-amber-400 to-amber-600 text-white relative overflow-hidden group">
+                <i class="bi bi-star-fill absolute -right-6 -bottom-6 text-amber-300 text-8xl opacity-30 group-hover:scale-110 group-hover:opacity-50 transition-all duration-500"></i>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-amber-200 mb-1">Good Prospects</p>
+                    <h3 class="font-black text-5xl tracking-tighter mb-2" th:text="${goodMatches.size()}">0</h3>
+                    <p class="text-sm font-medium text-amber-100 flex items-center gap-2"><i class="bi bi-hourglass-split"></i> Good Matches</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="space-y-12 pt-4">
+
+            <!-- Excellent Matches -->
+            <div th:if="${!excellentMatches.isEmpty()}" class="space-y-4">
+                <h4 class="text-sm font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="bi bi-trophy"></i> Excellent Matches (80-100%)
+                </h4>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <div th:each="result : ${excellentMatches}" class="modern-card p-6 border-l-4 border-l-emerald-500 bg-surface border border-white/10 hover:border-emerald-500/30 hover:shadow-lg transition-all group flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        
+                        <div class="flex-1 space-y-3">
+                            <h5 class="text-xl font-black text-foreground group-hover:text-emerald-400 transition-colors" th:text="${result.job.title}">Software Engineer</h5>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.department}">Engineering</span>
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.location}">New York</span>
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.jobType.displayName}">Full Time</span>
+                            </div>
+
+                            <p class="text-xs font-bold text-foreground-muted flex items-start gap-2 bg-white/[0.02] p-3 rounded-xl border border-white/[0.04]">
+                                <i class="bi bi-check2-circle text-emerald-400 text-lg"></i> 
+                                <span class="mt-0.5"><strong class="uppercase tracking-wider text-[10px] text-foreground-subtle block mb-0.5">Matching Skills:</strong> <span th:text="${result.matchedSkills != null ? result.matchedSkills : 'None'}"></span></span>
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-3 min-w-[200px] border-l border-white/[0.04] pl-6 shrink-0">
+                            <div class="text-center">
+                                <div class="font-black text-4xl text-emerald-400 tracking-tighter" th:text="${#numbers.formatDecimal(result.overallScore, 1, 1)} + '%'">85%</div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400 mt-1" th:text="${result.matchLevel}">Excellent Match</p>
+                            </div>
+                            
+                            <a th:href="@{/skill-match/result/{id}(id=${result.id})}" class="w-full text-center modern-btn text-xs font-black h-10 px-4 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/30 transition-all rounded-xl shadow-sm">
+                                <i class="bi bi-eye mr-2"></i> View Details
+                            </a>
+                            
+                            <small class="text-[9px] font-bold tracking-widest text-foreground-subtle uppercase">
+                                <i class="bi bi-calendar"></i> Evaluated: <span th:text="${#temporals.format(result.matchDate, 'dd MMM yyyy')}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Good Matches -->
+            <div th:if="${!goodMatches.isEmpty()}" class="space-y-4">
+                <h4 class="text-sm font-black text-amber-400 uppercase tracking-widest flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="bi bi-star"></i> Good Matches (60-79%)
+                </h4>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <div th:each="result : ${goodMatches}" class="modern-card p-6 border-l-4 border-l-amber-500 bg-surface border border-white/10 hover:border-amber-500/30 hover:shadow-lg transition-all group flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        
+                        <div class="flex-1 space-y-3">
+                            <h5 class="text-xl font-black text-foreground group-hover:text-amber-400 transition-colors" th:text="${result.job.title}">Software Engineer</h5>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.department}">Engineering</span>
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.location}">New York</span>
+                                <span class="bg-accent/10 text-accent border border-indigo-500/30 px-2.5 py-1 rounded text-[10px] font-black tracking-widest uppercase shadow-sm" th:text="${result.job.jobType.displayName}">Full Time</span>
+                            </div>
+
+                            <p class="text-xs font-bold text-foreground-muted flex items-start gap-2 bg-rose-500/10 p-3 rounded-xl border border-rose-500/30">
+                                <i class="bi bi-exclamation-circle text-amber-400 text-lg"></i> 
+                                <span class="mt-0.5"><strong class="uppercase tracking-wider text-[10px] text-foreground-subtle block mb-0.5">Missing Required Skills:</strong> <span th:text="${result.missingSkills != null ? result.missingSkills : 'None'}"></span></span>
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-3 min-w-[200px] border-l border-white/[0.04] pl-6 shrink-0">
+                            <div class="text-center">
+                                <div class="font-black text-4xl text-amber-400 tracking-tighter" th:text="${#numbers.formatDecimal(result.overallScore, 1, 1)} + '%'">75%</div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-400 mt-1" th:text="${result.matchLevel}">Good Match</p>
+                            </div>
+                            
+                            <a th:href="@{/skill-match/result/{id}(id=${result.id})}" class="w-full text-center modern-btn text-xs font-black h-10 px-4 bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-white border border-amber-500/30 transition-all rounded-xl shadow-sm">
+                                <i class="bi bi-eye mr-2"></i> View Details
+                            </a>
+                            
+                            <small class="text-[9px] font-bold tracking-widest text-foreground-subtle uppercase">
+                                <i class="bi bi-calendar"></i> Evaluated: <span th:text="${#temporals.format(result.matchDate, 'dd MMM yyyy')}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Matches -->
+            <div th:if="${!otherMatches.isEmpty()}" class="space-y-4">
+                <h4 class="text-sm font-black text-foreground-subtle uppercase tracking-widest flex items-center gap-2 px-2">
+                    <i class="bi bi-hdd-network"></i> Other Matches
+                </h4>
+                
+                <div class="modern-card p-0 border border-white/[0.08] bg-surface overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-white/[0.02] border-b border-white/[0.08] text-[10px] font-black uppercase tracking-widest text-foreground-subtle">
+                                    <th class="p-4 px-6">Job Title</th>
+                                    <th class="p-4">Department</th>
+                                    <th class="p-4">Match Score</th>
+                                    <th class="p-4">Match Level</th>
+                                    <th class="p-4 text-right px-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm font-medium text-foreground-muted bg-transparent">
+                                <tr th:each="result : ${otherMatches}" class="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors">
+                                    <td class="p-4 px-6 font-black text-foreground" th:text="${result.job.title}">Software Engineer</td>
+                                    <td class="p-4 text-xs font-bold text-foreground-subtle" th:text="${result.job.department}">Engineering</td>
+                                    <td class="p-4">
+                                        <span class="bg-surface border border-white/[0.08] text-foreground-muted px-2 py-1 rounded text-[10px] font-black tracking-widest shadow-sm" th:text="${#numbers.formatDecimal(result.overallScore, 1, 1)} + '%'">50%</span>
+                                    </td>
+                                    <td class="p-4 text-[10px] font-bold uppercase tracking-widest text-foreground-subtle" th:text="${result.matchLevel}">Average Match</td>
+                                    <td class="p-4 px-6 text-right">
+                                        <a th:href="@{/skill-match/result/{id}(id=${result.id})}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-accent/10 text-accent hover:bg-indigo-600 hover:text-white transition-colors border border-indigo-500/30 shadow-sm" title="Inspect">
+                                            <i class="bi bi-eye-fill text-xs"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results -->
+            <div th:if="${totalMatches == 0}" class="modern-card p-16 text-center border border-dashed border-white/20 bg-surface">
+                <i class="bi bi-graph-down-arrow text-6xl text-slate-500 mb-6 inline-block"></i>
+                <h4 class="font-black text-2xl text-foreground-muted mb-2">No Matches Yet</h4>
+                <p class="text-sm font-bold text-foreground-subtle mb-8 max-w-md mx-auto">You have no active job match evaluations. Apply to open job postings to view your compatibility.</p>
+                <a href="/jobs/browse" class="modern-btn bg-indigo-600 text-white shadow-indigo-500/30 hover:bg-indigo-500">
+                    <i class="bi bi-search mr-2"></i> Browse Jobs
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

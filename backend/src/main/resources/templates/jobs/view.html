@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${job.title} + ' - Job Details'">Job Details</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    
+    <!-- Ambient Blobs Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[1400px] rounded-[100%] blur-[150px] bg-accent/15 top-[10%] left-[-10%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[800px] h-[800px] rounded-[100%] blur-[150px] bg-indigo-600/10 bottom-[-20%] right-[10%] animate-blob-float-alt mix-blend-screen"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTY0IDBMMCAwaDB2NjRoNjRWMHptLTYzIDYzaC0xdjYzaDF2LTYzeiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')] opacity-50"></div>
+    </div>
+
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+        
+        <div class="flex items-center gap-4 mb-4">
+            <a href="/jobs/browse" class="w-12 h-12 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center hover:text-accent-bright hover:bg-white/[0.04] hover:-translate-y-1 active:scale-95 transition-all flex-shrink-0 shadow-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-black font-heading tracking-tight text-foreground drop-shadow-sm line-clamp-2" th:text="${job.title}">Job Details</h1>
+                <p class="text-foreground-muted font-bold tracking-wide uppercase text-sm mt-1">Job ID: <span class="font-mono text-accent">[[${job.id}]]</span></p>
+            </div>
+        </div>
+
+        <div th:if="${message}" class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-check-circle-fill text-xl"></i> <span th:text="${message}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-emerald-400/50 hover:text-emerald-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 p-4 rounded-2xl shadow-sm inline-flex items-center gap-3 font-bold text-sm w-full">
+            <i class="bi bi-exclamation-triangle-fill text-xl"></i> <span th:text="${error}"></span>
+            <button onclick="this.parentElement.style.display='none'" class="text-rose-400/50 hover:text-rose-400 ml-auto"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Hero Card -->
+        <div class="modern-card overflow-hidden p-0 relative border-0">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/20 via-indigo-600/20 to-indigo-800/20 border border-white/[0.08] rounded-3xl -z-10"></div>
+            <i class="bi bi-building absolute -right-10 -bottom-10 text-9xl text-white opacity-5"></i>
+            
+            <div class="p-8 sm:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-b border-white/[0.08]">
+                
+                <div class="space-y-4 flex-1">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span th:if="${job.isActive() and !job.isExpired()}" class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                            <i class="bi bi-plug"></i> Active
+                        </span>
+                        <span th:unless="${job.isActive() or job.isExpired()}" class="px-3 py-1 bg-white/[0.04] border border-white/[0.08] text-foreground rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                            <i class="bi bi-pause-circle"></i> Closed
+                        </span>
+                        <span class="px-3 py-1 bg-white/[0.04] border border-white/[0.08] text-foreground-muted rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                            <i class="bi bi-people-fill"></i> <span th:text="${job.vacancies}"></span> Vacancies
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 font-bold text-sm text-foreground">
+                        <span class="flex items-center gap-2"><i class="bi bi-grid-1x2-fill text-accent"></i> <span th:text="${job.department}"></span></span>
+                        <span class="flex items-center gap-2"><i class="bi bi-geo-alt-fill text-emerald-500"></i> <span th:text="${job.location}"></span></span>
+                        <span class="flex items-center gap-2"><i class="bi bi-stopwatch-fill text-amber-500"></i> <span th:text="${job.jobType.displayName}"></span></span>
+                    </div>
+                </div>
+
+                <div class="shrink-0 text-left md:text-right p-6 bg-surface rounded-[24px] border border-white/[0.08] flex flex-col items-start md:items-end justify-center min-w-[200px]">
+                    <p class="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest mb-1">Salary Range</p>
+                    <div class="text-2xl sm:text-3xl font-black font-heading text-emerald-400 drop-shadow-md" th:text="${job.getSalaryRange()}">$70k - $90k</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Left Narrative -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Description Body -->
+                <div class="modern-card p-8 sm:p-12 relative overflow-hidden bg-transparent border border-white/[0.08]">
+                    <h3 class="text-xl font-black flex items-center gap-3 border-b border-white/[0.08] pb-4 mb-6 text-foreground">
+                        <i class="bi bi-file-earmark-text-fill text-accent-bright"></i> Job Description
+                    </h3>
+                    <div class="prose prose-invert prose-sm max-w-none text-foreground-muted font-medium leading-relaxed whitespace-pre-line" th:text="${job.description}">
+                        Description body
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <!-- Required Skills -->
+                    <div class="modern-card p-6 border-t-4 border-t-accent bg-transparent border border-white/[0.08] shadow-sm">
+                        <h4 class="text-md font-black flex items-center gap-2 border-b border-white/[0.08] pb-3 mb-4 text-foreground">
+                            <i class="bi bi-lightning-charge-fill text-accent"></i> Required Skills
+                        </h4>
+                        <div th:if="${job.requiredSkills != null and !job.requiredSkills.isEmpty()}" class="flex flex-wrap gap-2">
+                            <div th:each="skill : ${#strings.listSplit(job.requiredSkills, ',')}" th:if="${skill != null and !skill.isEmpty()}" class="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg text-xs font-bold text-accent shadow-sm">
+                                <span th:text="${skill.trim()}"></span>
+                            </div>
+                        </div>
+                        <div th:unless="${job.requiredSkills != null and !job.requiredSkills.isEmpty()}">
+                            <p class="text-foreground-subtle/50 text-xs font-bold"><i class="bi bi-x-circle"></i> No skills assigned</p>
+                        </div>
+                    </div>
+
+                    <!-- Preferred Skills -->
+                    <div th:if="${job.preferredSkills != null and !job.preferredSkills.isEmpty()}" class="modern-card p-6 border-t-4 border-t-emerald-500 bg-transparent border border-white/[0.08] shadow-sm">
+                        <h4 class="text-md font-black flex items-center gap-2 border-b border-white/[0.08] pb-3 mb-4 text-foreground">
+                            <i class="bi bi-star-fill text-amber-500"></i> Preferred Skills
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <div th:each="skill : ${#strings.listSplit(job.preferredSkills, ',')}" th:if="${skill != null and !skill.isEmpty()}" class="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs font-bold text-emerald-400 shadow-sm">
+                                <span th:text="${skill.trim()}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education / Exp Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div class="modern-card p-6 bg-transparent border border-white/[0.08]">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle flex items-center gap-2 mb-2"><i class="bi bi-mortarboard-fill text-sky-500 text-lg"></i> Education Requirement</p>
+                        <p class="font-bold text-sm text-foreground" th:text="${job.educationRequirement}"></p>
+                    </div>
+                    <div class="modern-card p-6 bg-transparent border border-white/[0.08]">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle flex items-center gap-2 mb-2"><i class="bi bi-stopwatch-fill text-amber-500 text-lg"></i> Minimum Experience</p>
+                        <p class="font-bold text-sm text-foreground" th:text="${job.experienceRequired}"></p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Widget List -->
+            <div class="space-y-8">
+                
+                <!-- Action Center -->
+                <div class="modern-card p-6 border-2 border-white/[0.08] bg-surface relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent to-emerald-500"></div>
+                    <h5 class="text-sm font-black uppercase tracking-widest text-foreground flex items-center gap-2 mb-6 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-send-fill text-accent text-lg"></i> Actions
+                    </h5>
+                    
+                    <div class="space-y-2">
+                        <div sec:authorize="isAuthenticated()">
+                            <div sec:authorize="hasRole('CANDIDATE')">
+                                <div th:if="${hasApplied}" class="text-center">
+                                    <div class="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl shadow-inner mx-auto mb-4">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                    <p class="font-bold text-sm text-emerald-500 mb-4">You have already applied for this job.</p>
+                                    <a href="/jobs/my-applications" class="modern-btn modern-btn-secondary w-full hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 text-foreground-muted">
+                                        View Application <i class="bi bi-arrow-right ml-2 text-lg leading-none"></i>
+                                    </a>
+                                </div>
+                                <div th:unless="${hasApplied}">
+                                    <div th:if="${job.isActive() and !job.isExpired()}">
+                                        <a th:href="@{/jobs/apply/{id}(id=${job.id})}" class="modern-btn modern-btn-success w-full text-center text-lg shadow-modern-button font-black tracking-wide py-4">
+                                            Apply Now <i class="bi bi-arrow-right ml-2 text-2xl leading-none"></i>
+                                        </a>
+                                        <div class="mt-4 p-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-center">
+                                            <p class="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest"><i class="bi bi-file-earmark-pdf-fill mr-1 text-rose-500"></i> Requires 1 PDF Resume</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div sec:authorize="hasAnyRole('HR', 'ADMIN')">
+                                <div class="p-3 bg-accent/10 border border-accent/20 text-accent rounded-xl font-bold text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i class="bi bi-shield-check text-lg"></i> Admin / HR Controls
+                                </div>
+                                <div class="flex flex-col gap-3">
+                                    <a th:href="@{/jobs/edit/{id}(id=${job.id})}" class="modern-btn modern-btn-secondary w-full text-foreground-muted border-white/[0.08]">
+                                        <i class="bi bi-pen mr-2"></i> Edit Job
+                                    </a>
+                                    <a th:href="@{/jobs/{jobId}/applications(jobId=${job.id})}" class="modern-btn modern-btn-primary w-full text-white">
+                                        <i class="bi bi-people mr-2"></i> View Applications
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div sec:authorize="!isAuthenticated()" class="text-center pt-2">
+                            <div class="w-16 h-16 rounded-full bg-white/[0.04] border border-white/[0.08] text-foreground-subtle flex items-center justify-center text-2xl shadow-inner mx-auto mb-4">
+                                <i class="bi bi-lock-fill"></i>
+                            </div>
+                            <p class="font-bold text-sm text-foreground-muted mb-6">Log in to apply for this job.</p>
+                            <div class="flex flex-col gap-3">
+                                <a href="/auth/login" class="modern-btn modern-btn-primary w-full">Log In</a>
+                                <a href="/auth/register" class="text-xs font-bold uppercase tracking-widest text-accent hover:text-accent-bright transition-colors mt-2">Create Account</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meta Frame -->
+                <div class="modern-card p-6 bg-transparent border border-white/[0.08]">
+                    <h5 class="text-sm font-black uppercase tracking-widest text-foreground-muted flex items-center gap-2 mb-6 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-server text-accent-bright text-lg"></i> Job Meta
+                    </h5>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm border-b border-white/[0.04] pb-2">
+                            <span class="font-bold text-foreground-subtle">Posted By</span>
+                            <span class="font-bold text-foreground" th:text="${job.postedBy.fullName}"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-b border-white/[0.04] pb-2">
+                            <span class="font-bold text-foreground-subtle">Posted Date</span>
+                            <span class="font-mono text-xs bg-surface px-2 py-1 border border-white/[0.04] rounded font-bold text-foreground-muted" th:text="${#temporals.format(job.postedDate, 'dd MMM yyyy')}"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-b border-white/[0.04] pb-2">
+                            <span class="font-bold text-foreground-subtle">Closing Date</span>
+                            <span th:if="${job.expiryDate != null}" class="font-mono text-xs bg-surface px-2 py-1 border border-white/[0.04] rounded font-bold text-foreground-muted" th:text="${#temporals.format(job.expiryDate, 'dd MMM yyyy')}"></span>
+                            <span th:unless="${job.expiryDate != null}" class="text-xs font-bold text-foreground-subtle/50 italic">None Defined</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm pt-2">
+                            <span class="font-bold text-foreground-subtle">Application Stats</span>
+                            <span class="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold shadow-sm">
+                                Total: <span th:text="${job.applicationCount}"></span> <span class="text-emerald-400/50 mx-1">/</span> Pending: <span th:text="${job.pendingApplicationCount}"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ext Links -->
+                <div class="modern-card p-6 bg-transparent border border-white/[0.08]">
+                    <h5 class="text-sm font-black uppercase tracking-widest text-foreground-muted flex items-center gap-2 mb-6 border-b border-white/[0.08] pb-4">
+                        <i class="bi bi-broadcast text-sky-500 text-lg"></i> Share Job
+                    </h5>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="shareOnLinkedIn()" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#0077b5]/10 text-[#0077b5] border border-[#0077b5]/20 hover:bg-[#0077b5] hover:text-white transition-all shadow-sm">
+                            <i class="bi bi-linkedin text-xl mb-1"></i>
+                            <span class="text-[10px] font-bold uppercase">LinkedIn</span>
+                        </button>
+                        <button onclick="shareOnTwitter()" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.04] text-foreground border border-white/[0.08] hover:bg-white hover:text-black transition-all shadow-sm">
+                            <i class="bi bi-twitter-x text-xl mb-1"></i>
+                            <span class="text-[10px] font-bold uppercase">X (Twitter)</span>
+                        </button>
+                        <button onclick="copyJobLink()" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-surface text-foreground-muted border border-white/[0.08] hover:bg-white/[0.08] hover:text-foreground transition-all shadow-sm">
+                            <i class="bi bi-link-45deg text-xl mb-1"></i>
+                            <span class="text-[10px] font-bold uppercase">Copy Link</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function copyJobLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Job link copied to clipboard!');
+            });
+        }
+        function shareOnLinkedIn() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+        }
+        function shareOnTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent(document.querySelector('h1').textContent);
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+        }
+    </script>
+</body>
+</html>

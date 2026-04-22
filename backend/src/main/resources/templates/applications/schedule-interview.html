@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Schedule Interview — ' + ${candidate.fullName}">Schedule Interview</title>
+    <div th:replace="~{fragments/modern-setup :: tailwind-config}"></div>
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* ── Dark Flatpickr theme to match app ── */
+        .flatpickr-calendar {
+            background: #16181e !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5) !important;
+            font-family: inherit !important;
+        }
+        .flatpickr-months, .flatpickr-month { background: transparent !important; color: #e2e8f0 !important; fill: #e2e8f0 !important; }
+        .flatpickr-weekday { color: rgba(148,163,184,0.6) !important; }
+        .flatpickr-day { color: #cbd5e1 !important; border-radius: 8px !important; }
+        .flatpickr-day:hover, .flatpickr-day.prevMonthDay:hover, .flatpickr-day.nextMonthDay:hover {
+            background: rgba(99,102,241,0.2) !important; border-color: transparent !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+            background: #6366f1 !important; border-color: #6366f1 !important; color: #fff !important;
+        }
+        .flatpickr-day.today { border-color: rgba(99,102,241,0.4) !important; }
+        .flatpickr-day.flatpickr-disabled, .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay {
+            color: rgba(100,116,139,0.4) !important;
+        }
+        .flatpickr-current-month input.cur-year,
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            color: #e2e8f0 !important; background: transparent !important;
+        }
+        .flatpickr-monthDropdown-months option { background: #16181e !important; }
+        .numInputWrapper span.arrowUp:after  { border-bottom-color: #94a3b8 !important; }
+        .numInputWrapper span.arrowDown:after { border-top-color: #94a3b8 !important; }
+        .flatpickr-time { background: transparent !important; border-top: 1px solid rgba(255,255,255,0.06) !important; }
+        .flatpickr-time .numInputWrapper input, .flatpickr-time .flatpickr-am-pm {
+            color: #e2e8f0 !important; background: transparent !important;
+        }
+        .flatpickr-time .flatpickr-time-separator { color: #94a3b8 !important; }
+        /* Input wrapper icon */
+        .fp-input-wrap { position: relative; }
+        .fp-input-wrap .fp-icon {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            color: #6366f1; pointer-events: none; font-size: 1rem;
+        }
+        .fp-input-wrap input { padding-right: 2.5rem !important; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-background-base text-foreground font-sans min-h-screen relative overflow-x-hidden p-0 m-0 pb-20">
+
+    <!-- Ambient Background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div class="ambient-noise"></div>
+        <div class="absolute w-[900px] h-[900px] rounded-[100%] blur-[160px] bg-indigo-600/10 top-[5%] left-[-5%] animate-blob-float mix-blend-screen"></div>
+        <div class="absolute w-[700px] h-[700px] rounded-[100%] blur-[130px] bg-accent/8 bottom-[-10%] right-[5%] animate-blob-float-alt mix-blend-screen"></div>
+    </div>
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-8 py-10 lg:py-16 relative z-10 space-y-8">
+
+        <!-- Toolbar -->
+        <div class="flex items-center gap-4">
+            <a th:href="@{/jobs/{id}/applications(id=${jobId})}"
+               class="w-12 h-12 rounded-full bg-surface border border-white/[0.08] text-foreground-muted flex items-center justify-center hover:text-accent-bright hover:bg-white/[0.04] transition-all shadow-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black font-heading tracking-tight flex items-center gap-3">
+                    <i class="bi bi-calendar-plus-fill text-indigo-400"></i> Schedule Interview
+                </h1>
+                <p class="text-foreground-muted text-sm mt-0.5">
+                    For <span class="text-foreground font-bold" th:text="${candidate.fullName}">Candidate</span>
+                    &mdash; <span class="text-accent" th:text="${job.title}">Position</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${message}" class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm">
+            <i class="bi bi-check-circle-fill"></i><span th:text="${message}" class="font-bold"></span>
+        </div>
+        <div th:if="${error}" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-sm">
+            <i class="bi bi-exclamation-octagon-fill"></i><span th:text="${error}" class="font-bold"></span>
+        </div>
+
+        <!-- Candidate Summary Card -->
+        <div class="modern-card p-6 border border-indigo-500/20 bg-surface overflow-hidden relative">
+            <div class="absolute -right-6 -top-6 text-indigo-500/5 text-[10rem] pointer-events-none">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Candidate</div>
+                    <h3 class="text-2xl font-black text-foreground" th:text="${candidate.fullName}">John Doe</h3>
+                    <p class="text-foreground-subtle font-medium flex items-center gap-2 mt-1">
+                        <i class="bi bi-envelope"></i>
+                        <span th:text="${candidate.email}"></span>
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-bold"
+                          th:text="${job.title}"></span>
+                    <span class="px-3 py-1.5 rounded-lg bg-accent/10 text-accent-bright border border-accent/20 text-xs font-bold"
+                          th:text="${application.matchScore != null ? #numbers.formatDecimal(application.matchScore, 1, 0) + '% Match' : 'Unscored'}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interview Form -->
+        <form th:action="@{/applications/{id}/schedule-interview(id=${applicationId})}"
+              method="post"
+              id="interviewForm"
+              class="space-y-6">
+
+            <!-- jobId passed back so controller can redirect to /jobs/{jobId}/applications -->
+            <input type="hidden" name="jobId" th:value="${jobId}">
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- LEFT COLUMN -->
+                <div class="space-y-6">
+
+                    <!-- Date & Time -->
+                    <div class="modern-card p-6 border border-white/[0.08] bg-surface space-y-5">
+                        <div class="flex items-center gap-3 mb-1">
+                            <i class="bi bi-clock-fill text-indigo-400"></i>
+                            <h5 class="font-black text-sm uppercase tracking-widest">Date &amp; Time</h5>
+                        </div>
+                        <!-- Single combined date+time picker -->
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Interview Date &amp; Time <span class="text-rose-400">*</span></label>
+                            <div class="fp-input-wrap">
+                                <input type="text" id="interviewDateTime" name="interviewDateTime"
+                                       class="modern-input bg-background-base w-full"
+                                       placeholder="Select date and time…" required autocomplete="off">
+                                <i class="bi bi-calendar-event fp-icon"></i>
+                            </div>
+                            <p class="text-[10px] text-foreground-subtle mt-1.5">Times snap to 15-minute intervals</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Duration</label>
+                            <select name="interviewDuration" class="modern-input bg-background-base w-full">
+                                <option value="30 minutes">30 minutes</option>
+                                <option value="45 minutes">45 minutes</option>
+                                <option value="60 minutes" selected>60 minutes</option>
+                                <option value="90 minutes">90 minutes</option>
+                                <option value="120 minutes">120 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Interview Type -->
+                    <div class="modern-card p-6 border border-white/[0.08] bg-surface space-y-4">
+                        <div class="flex items-center gap-3 mb-1">
+                            <i class="bi bi-person-video3 text-amber-400"></i>
+                            <h5 class="font-black text-sm uppercase tracking-widest">Interview Type</h5>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="type-btn cursor-pointer" for="typeOnline">
+                                <input type="radio" class="sr-only" name="interviewType" id="typeOnline" value="ONLINE" checked>
+                                <div class="type-btn-inner border-2 border-sky-500/50 bg-sky-500/10 text-sky-400 py-4 rounded-xl flex flex-col items-center gap-2 text-center transition-all">
+                                    <i class="bi bi-camera-video-fill text-xl"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Online</span>
+                                </div>
+                            </label>
+                            <label class="type-btn cursor-pointer" for="typePhone">
+                                <input type="radio" class="sr-only" name="interviewType" id="typePhone" value="PHONE">
+                                <div class="type-btn-inner border-2 border-white/[0.08] text-foreground-muted py-4 rounded-xl flex flex-col items-center gap-2 text-center transition-all hover:border-amber-500/30 hover:text-amber-400">
+                                    <i class="bi bi-telephone-fill text-xl"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Phone</span>
+                                </div>
+                            </label>
+                            <label class="type-btn cursor-pointer" for="typeInPerson">
+                                <input type="radio" class="sr-only" name="interviewType" id="typeInPerson" value="IN_PERSON">
+                                <div class="type-btn-inner border-2 border-white/[0.08] text-foreground-muted py-4 rounded-xl flex flex-col items-center gap-2 text-center transition-all hover:border-emerald-500/30 hover:text-emerald-400">
+                                    <i class="bi bi-building-fill text-xl"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">In Person</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Online Section -->
+                        <div id="onlineSection" class="space-y-3 mt-2">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Meeting Link</label>
+                            <input type="url" class="modern-input bg-background-base w-full" name="interviewLink"
+                                   placeholder="https://meet.google.com/..." value="https://meet.google.com/">
+                        </div>
+
+                        <!-- In-Person Section (hidden) -->
+                        <div id="inPersonSection" class="space-y-3 mt-2 hidden">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Location / Address</label>
+                            <input type="text" class="modern-input bg-background-base w-full" name="interviewLocation"
+                                   placeholder="Office address, room number, etc.">
+                        </div>
+
+                        <!-- Phone Section (hidden) -->
+                        <div id="phoneSection" class="space-y-3 mt-2 hidden">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Phone Number</label>
+                            <input type="tel" class="modern-input bg-background-base w-full" name="phoneNumber"
+                                   placeholder="Contact phone number for interview call">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="space-y-6">
+
+                    <!-- Interviewer Info -->
+                    <div class="modern-card p-6 border border-white/[0.08] bg-surface space-y-5">
+                        <div class="flex items-center gap-3 mb-1">
+                            <i class="bi bi-person-badge-fill text-emerald-400"></i>
+                            <h5 class="font-black text-sm uppercase tracking-widest">Interviewer</h5>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Name</label>
+                            <input type="text" class="modern-input bg-background-base w-full" name="interviewerName"
+                                   placeholder="e.g. Jane Smith">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-foreground-subtle mb-2">Email</label>
+                            <input type="email" class="modern-input bg-background-base w-full" name="interviewerEmail"
+                                   placeholder="interviewer@company.com">
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="modern-card p-6 border border-white/[0.08] bg-surface space-y-4">
+                        <div class="flex items-center gap-3 mb-1">
+                            <i class="bi bi-list-check text-sky-400"></i>
+                            <h5 class="font-black text-sm uppercase tracking-widest">Candidate Instructions</h5>
+                        </div>
+                        <textarea class="modern-input bg-background-base w-full min-h-[110px] resize-none text-sm"
+                                  name="instructions"
+                                  placeholder="Preparation notes, documents to bring, dress code, etc."></textarea>
+                    </div>
+
+                    <!-- Internal Notes -->
+                    <div class="modern-card p-6 border border-white/[0.08] bg-surface space-y-4">
+                        <div class="flex items-center gap-3 mb-1">
+                            <i class="bi bi-sticky-fill text-amber-400"></i>
+                            <h5 class="font-black text-sm uppercase tracking-widest">Internal Notes</h5>
+                            <span class="ml-auto text-[10px] font-bold uppercase tracking-widest text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">Private</span>
+                        </div>
+                        <textarea class="modern-input bg-background-base w-full min-h-[80px] resize-none text-sm"
+                                  name="additionalNotes"
+                                  placeholder="Internal notes — not shared with candidate"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Row -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button type="submit"
+                        class="flex-1 py-4 modern-btn modern-btn-primary shadow-indigo-500/30 text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3">
+                    <i class="bi bi-calendar-check-fill text-lg"></i> Confirm &amp; Schedule Interview
+                </button>
+                <a th:href="@{/jobs/{id}/applications(id=${jobId})}"
+                   class="px-8 py-4 rounded-[14px] border border-white/[0.08] text-foreground-muted font-bold text-sm hover:bg-white/[0.04] transition-all text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // ── Single Flatpickr: combined date + time ──
+        // dateFormat "Y-m-dTH:i:S" → "2026-04-01T10:30:00"
+        // Controller parses it with DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+        const dtPicker = flatpickr('#interviewDateTime', {
+            enableTime: true,
+            dateFormat: "Y-m-dTH:i:S",
+            minDate: 'today',
+            time_24hr: true,
+            minuteIncrement: 15,
+            disableMobile: false
+        });
+
+        // ── Interview type toggle ──
+        const typeSections = { ONLINE: 'onlineSection', IN_PERSON: 'inPersonSection', PHONE: 'phoneSection' };
+        const typeColors    = { ONLINE: ['border-sky-500/50','bg-sky-500/10','text-sky-400'], IN_PERSON: ['border-emerald-500/50','bg-emerald-500/10','text-emerald-400'], PHONE: ['border-amber-500/50','bg-amber-500/10','text-amber-400'] };
+
+        function updateTypeUI(selectedValue) {
+            // Hide all sections
+            Object.values(typeSections).forEach(id => document.getElementById(id).classList.add('hidden'));
+            // Show relevant section
+            if (typeSections[selectedValue]) document.getElementById(typeSections[selectedValue]).classList.remove('hidden');
+
+            // Update button styles
+            document.querySelectorAll('.type-btn').forEach(lbl => {
+                const radio = lbl.querySelector('input[type=radio]');
+                const inner = lbl.querySelector('.type-btn-inner');
+                const colors = typeColors[radio.value] || [];
+                inner.classList.remove(...Object.values(typeColors).flat());
+                inner.classList.add('border-2','border-white/[0.08]','text-foreground-muted');
+                if (radio.value === selectedValue) {
+                    inner.classList.remove('border-white/[0.08]','text-foreground-muted');
+                    inner.classList.add(...colors);
+                }
+            });
+        }
+
+        document.querySelectorAll('input[name="interviewType"]').forEach(radio => {
+            radio.addEventListener('change', () => updateTypeUI(radio.value));
+        });
+        updateTypeUI('ONLINE'); // init
+
+        // ── Form submit: validate picker filled ──
+        document.getElementById('interviewForm').addEventListener('submit', function(e) {
+            if (!dtPicker.selectedDates.length) {
+                e.preventDefault();
+                alert('Please select an interview date and time.');
+            }
+        });
+    </script>
+</body>
+</html>
