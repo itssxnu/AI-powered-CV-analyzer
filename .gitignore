@@ -49,9 +49,6 @@ cv_model/*$py.class
 **/__pycache__/
 **/*.pyc
 
-# Trained model artefacts  (large binary files)
-# Commit only if using Git LFS  →  see .gitattributes
-cv_model/*.pkl
 
 # Temporary / debug scripts
 cv_model/output.txt
