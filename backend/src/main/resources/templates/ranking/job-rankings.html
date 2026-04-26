@@ -190,7 +190,7 @@
                             <i class="bi bi-star-fill text-amber-400 mr-2 text-xs"></i> Show Shortlisted
                         </button>
                         <button onclick="filterTopRanked()" class="w-full bg-slate-900/50 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl py-2 font-bold tracking-widest uppercase text-[10px] transition-colors flex items-center justify-center">
-                            <i class="bi bi-trophy-fill text-yellow-500 mr-2 text-xs"></i> Top 5 Candidates
+                            <i class="bi bi-trophy-fill text-blue-500 mr-2 text-xs"></i> Top 5 Candidates
                         </button>
                         <button onclick="clearFilters()" class="w-full bg-slate-900/50 hover:bg-rose-900/50 border border-slate-700 hover:border-rose-500/50 text-foreground-subtle hover:text-rose-400 rounded-xl py-2 font-bold tracking-widest uppercase text-[10px] transition-colors flex items-center justify-center">
                             <i class="bi bi-x-circle mr-2 text-xs"></i> Clear Filters
@@ -207,7 +207,7 @@
                     <div class="p-6 bg-white/[0.04] border-b border-white/[0.08] flex justify-between items-center backdrop-blur-sm">
                         <h5 class="font-black text-foreground flex items-center gap-2"><i class="bi bi-distribute-vertical text-accent"></i> Candidate Rankings Index</h5>
                         <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-surface border border-white/[0.08] px-3 py-1 rounded-lg text-foreground shadow-sm">
-                            <span class="w-2 h-2 rounded-full bg-yellow-400"></span> Top 5
+                            <span class="w-2 h-2 rounded-full bg-blue-400"></span> Top 5
                             <span class="w-2 h-2 rounded-full bg-emerald-500 ml-2"></span> Shortlisted
                         </div>
                     </div>
@@ -228,14 +228,14 @@
                             <table class="w-full text-left whitespace-nowrap" id="rankingsTable">
                                 <tbody class="divide-y divide-white/[0.04] font-medium text-sm">
                                     <tr th:each="ranking : ${rankings}" 
-                                        th:classappend="${ranking.topRanked} ? 'bg-yellow-500/10 border-l-4 border-l-yellow-400' : (${ranking.shortlisted} ? 'bg-emerald-500/10 border-l-4 border-l-emerald-400' : 'hover:bg-surface-hover border-l-4 border-l-transparent')"
+                                        th:classappend="${ranking.topRanked} ? 'bg-blue-500/10 border-l-4 border-l-blue-400' : (${ranking.shortlisted} ? 'bg-emerald-500/10 border-l-4 border-l-emerald-400' : 'hover:bg-surface-hover border-l-4 border-l-transparent')"
                                         class="transition-colors group relative"
                                         th:attr="data-score=${ranking.rankingScore}, data-shortlisted=${ranking.shortlisted}">
                                         
                                         <!-- Rank Index -->
                                         <td class="py-4 px-6 w-16">
                                             <div class="w-10 h-10 rounded-[14px] bg-surface text-foreground-muted flex items-center justify-center font-black text-lg border border-white/[0.08] shadow-sm"
-                                                 th:classappend="${ranking.topRanked} ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white border-yellow-300 shadow-yellow-500/30' : ''">
+                                                 th:classappend="${ranking.topRanked} ? 'bg-gradient-to-br from-blue-400 to-indigo-500 text-white border-blue-300 shadow-blue-500/30' : ''">
                                                 <span th:text="${ranking.rankPosition}">1</span>
                                             </div>
                                         </td>
