@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.metrics import mean_absolute_error, r2_score, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score
 import joblib
 
 DATASET_PATH = os.path.join("hotel_synth_dataset", "pairs.jsonl")
@@ -74,6 +74,28 @@ def train_model():
     
     print(f"Test Set MAE: {mae:.2f} points (out of 100)")
     print(f"Test Set R²:  {r2:.3f}")
+    
+    print("\n--- Classification Performance (Threshold >= 75) ---")
+    THRESHOLD = 75.0
+    y_true_cls = [1 if s >= THRESHOLD else 0 for s in y_test]
+    y_pred_cls = [1 if s >= THRESHOLD else 0 for s in preds]
+    
+    acc = accuracy_score(y_true_cls, y_pred_cls)
+    prec = precision_score(y_true_cls, y_pred_cls, zero_division=0)
+    rec = recall_score(y_true_cls, y_pred_cls, zero_division=0)
+    f1 = f1_score(y_true_cls, y_pred_cls, zero_division=0)
+    try:
+        roc_auc = roc_auc_score(y_true_cls, preds)
+    except Exception:
+        roc_auc = 0.0
+    cm = confusion_matrix(y_true_cls, y_pred_cls, labels=[0, 1])
+    
+    print(f"Accuracy:  {acc:.4f}")
+    print(f"AUC ROC:   {roc_auc:.4f}")
+    print(f"Precision: {prec:.4f}")
+    print(f"Recall:    {rec:.4f}")
+    print(f"F1 Score:  {f1:.4f}")
+    print(f"Confusion Matrix:\n{cm}")
     
     print("\nFeature Importances:")
     importances = model.feature_importances_
