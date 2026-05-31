@@ -9,18 +9,10 @@
 <h4 align="center">An Enterprise-Grade AI-Powered CV Matching, Parsing & Algorithmic Fairness Auditing Platform. Built on Spring Boot & FastAPI.</h4>
 
 <p align="center">
-  <a href="https://github.com/itssxnu/AI-powered-CV-analyzer/stargazers">
-    <img src="https://img.shields.io/github/stars/itssxnu/AI-powered-CV-analyzer?style=for-the-badge&color=8A2BE2&logo=github" alt="Stars">
-  </a>
-  <a href="https://github.com/itssxnu/AI-powered-CV-analyzer/network/members">
-    <img src="https://img.shields.io/github/forks/itssxnu/AI-powered-CV-analyzer?style=for-the-badge&color=00F5FF&logo=git" alt="Forks">
-  </a>
-  <a href="https://github.com/itssxnu/AI-powered-CV-analyzer/issues">
-    <img src="https://img.shields.io/github/issues/itssxnu/AI-powered-CV-analyzer?style=for-the-badge&color=FF3E96&logo=github-issues" alt="Issues">
-  </a>
-  <a href="https://github.com/itssxnu/AI-powered-CV-analyzer/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/itssxnu/AI-powered-CV-analyzer?style=for-the-badge&color=32CD32&logo=open-source-initiative" alt="License">
-  </a>
+  <img src="https://img.shields.io/badge/Platform-RecruitAI-8A2BE2?style=for-the-badge&logo=artificial-intelligence" alt="Platform">
+  <img src="https://img.shields.io/badge/Backend-Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/AI_Service-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Status-Active_%26_Ready-brightgreen?style=for-the-badge" alt="Status">
 </p>
 
 <p align="center">
@@ -125,10 +117,10 @@ graph LR
 
 ---
 
-## 🛡️ Real-Time Repository Analytics
+## 🛡️ Real-Time GitHub Analytics
 
 <p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=itssxnu&repo=AI-powered-CV-analyzer&theme=radical&show_owner=true" alt="GitHub Repository Stats" width="400">
+  <img src="https://github-readme-stats.vercel.app/api?username=itssxnu&theme=radical&show_icons=true" alt="GitHub Stats" width="400">
   <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=itssxnu&langs_count=5&layout=compact&theme=radical" alt="Top Languages" width="350">
 </p>
 
