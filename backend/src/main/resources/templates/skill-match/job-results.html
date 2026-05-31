@@ -151,16 +151,18 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 relative z-10">
-                            <a th:href="@{/skill-match/result/{id}(id=${result.id})}" class="col-span-2 py-2.5 rounded-xl bg-surface border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.1] text-foreground-muted hover:text-foreground text-center text-xs font-black uppercase tracking-widest transition-colors shadow-sm">
+                        <div class="flex flex-col gap-2 relative z-10">
+                            <a th:href="@{/skill-match/result/{id}(id=${result.id})}" class="w-full py-2.5 rounded-xl bg-surface border border-white/[0.08] hover:bg-white/[0.06] hover:border-white/[0.1] text-foreground-muted hover:text-foreground text-center text-xs font-black uppercase tracking-widest transition-colors shadow-sm">
                                 <i class="bi bi-zoom-in mr-1"></i> View Details
                             </a>
-                            <button th:onclick="'recalculateScore(' + ${result.id} + ')'" class="py-2.5 rounded-xl bg-surface hover:bg-white/[0.08] text-foreground-muted text-center text-xs font-black uppercase tracking-widest transition-colors border border-white/[0.08]">
-                                <i class="bi bi-arrow-repeat"></i>
-                            </button>
-                            <button sec:authorize="hasRole('ADMIN')" th:onclick="'deleteResult(' + ${result.id} + ')'" class="py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-center text-xs font-black uppercase tracking-widest transition-colors">
-                                <i class="bi bi-trash3"></i>
-                            </button>
+                            <div class="flex gap-2 w-full">
+                                <button th:onclick="'recalculateScore(' + ${result.id} + ')'" class="flex-1 py-2.5 rounded-xl bg-surface hover:bg-white/[0.08] text-foreground-muted text-center text-xs font-black uppercase tracking-widest transition-colors border border-white/[0.08]">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                                <button sec:authorize="hasRole('ADMIN')" th:onclick="'deleteResult(' + ${result.id} + ')'" class="flex-1 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-center text-xs font-black uppercase tracking-widest transition-colors">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
